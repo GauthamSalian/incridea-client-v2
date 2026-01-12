@@ -268,10 +268,10 @@ export default function EventRegistration({
         className="
           relative z-10 group flex flex-1 items-center justify-center gap-2 rounded-full
           px-6 py-3 capitalize text-white font-semibold
-          bg-white/10 border border-white/20
+          bg-teal-600 border border-teal-500
           backdrop-blur-2xl
           shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-          hover:bg-white/15 hover:border-white/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
+          hover:bg-teal-500 hover:border-teal-400 hover:shadow-[0_0_20px_rgba(20,184,166,0.25)]
           transition-all duration-300
           active:scale-[0.98]
           overflow-hidden
@@ -288,10 +288,10 @@ export default function EventRegistration({
         className="
           relative z-10 group flex flex-1 items-center justify-center gap-2 rounded-full
           px-6 py-3 capitalize text-white font-semibold
-          bg-white/10 border border-white/20
+          bg-pink-600 border border-pink-500
           backdrop-blur-2xl
           shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-          hover:bg-white/15 hover:border-white/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]
+          hover:bg-pink-500 hover:border-pink-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.25)]
           transition-all duration-300
           active:scale-[0.98]
           overflow-hidden

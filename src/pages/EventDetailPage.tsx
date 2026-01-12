@@ -104,27 +104,81 @@ function EventDetailPage() {
   return (
     <section
       className="relative min-h-screen w-full overflow-x-hidden bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/eventbg1.png')" }}
+      style={{ backgroundImage: "url('/eventbg2.jpg')" }}
     >
       <style>
-        {
-          "@import url('https://fonts.googleapis.com/css2?family=Macondo&family=Macondo+Swash+Caps&family=New+Rocker&display=swap');"
-        }
+        {`@import url('https://fonts.googleapis.com/css2?family=Macondo&family=Macondo+Swash+Caps&family=New+Rocker&display=swap');
+          @keyframes glassShimmer {
+            0% {
+              transform: translateX(-120%);
+              opacity: 0;
+            }
+            10% {
+              opacity: 0.3;
+            }
+            50% {
+              opacity: 0.5;
+            }
+            90% {
+              opacity: 0.3;
+            }
+            100% {
+              transform: translateX(120%);
+              opacity: 0;
+            }
+          }
+          .wave-container {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35), 
+                        0 2px 8px rgba(0, 0, 0, 0.15),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.15),
+                        inset 0 0px 16px rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.04) 100%);
+          }
+          .wave-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+          }
+          .wave-container::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
+            animation: glassShimmer 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(20px);
+          }`}
       </style>
       {/* overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-950/25 to-slate-950/45" />
+      <div className="absolute inset-0 " />
 
       <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
         <RouterLink
           to="/events"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-sky-300 hover:text-sky-200 transition-colors"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white/15 hover:border-white/30 hover:shadow-[0_0_20px_rgba(14,165,233,0.25)] transition-all duration-300"
+          title="Back to events"
         >
-          <AiOutlineArrowLeft /> Back to events
+          <AiOutlineArrowLeft className="text-sky-300 text-lg hover:text-sky-200" />
         </RouterLink>
 
-        {/* TOP GLASS CONTAINER: Event Header + Info */}
-        <div className="relative rounded-3xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_0_40px_rgba(0,255,255,0.08)] overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-cyan-500/15 before:via-fuchsia-500/10 before:to-emerald-500/15 before:blur-xxl before:-z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 sm:gap-6 p-4 sm:p-8">
+        {/* GLASS CONTAINER: Event Header + Description + Coordinators */}
+        <div className="wave-container relative backdrop-blur-[24px] overflow-hidden rounded-[30px]">
+          {/* Event Header Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 sm:gap-6 p-4 sm:p-8 border-b border-white/10">
             {/* LEFT: Poster Card */}
             <div className="rounded-2xl border border-white/15 overflow-hidden shadow-xl">
               <div className="relative aspect-[4/5] w-full bg-gradient-to-b from-white/20 to-black/40">
@@ -149,9 +203,11 @@ function EventDetailPage() {
             <div className="flex flex-col justify-between h-full">
               {/* Category & Title */}
               <div>
-                <p className="text-xs uppercase tracking-widest text-white/75 font-semibold">
-                  {event.category?.replaceAll("_", " ")}
-                </p>
+                <div className="inline-block px-4 py-2 rounded-2xl bg-slate-700/40 border border-white/20 mb-3">
+                  <p className="text-sm sm:text-base lg:text-lg uppercase tracking-wider text-yellow-400 font-bold italic">
+                    {event.category?.replaceAll("_", " ")}
+                  </p>
+                </div>
                 <h1
                   className="mt-1 sm:mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight"
                   style={{ fontFamily: "'New Rocker', cursive" }}
@@ -207,14 +263,13 @@ function EventDetailPage() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* BOTTOM GLASS CONTAINER: Description + Coordinators */}
-        <div className="relative rounded-3xl border border-white/15 bg-white/10 backdrop-blur-sm   shadow-[0_0_40px_rgba(0,255,255,0.08)] overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-cyan-500/15 before:via-fuchsia-500/10 before:to-emerald-500/15 before:blur-xxl before:-z-10">
+          {/* Description + Coordinators Section */}
           <div className="px-6 sm:px-8 py-8 sm:py-12 space-y-10 sm:space-y-16">
             {/* Description Section */}
             <div className="space-y-3 sm:space-y-6">
               <div className="flex items-center justify-center gap-4">
+                <div className="h-1 w-16 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500" />
                 <h2
                   className="text-2xl sm:text-4xl font-bold text-white text-center leading-tight"
                   style={{ fontFamily: "'Macondo', cursive" }}
@@ -238,6 +293,7 @@ function EventDetailPage() {
             {/* Event Coordinators Section */}
             <div className="space-y-3 sm:space-y-8">
               <div className="flex items-center justify-center gap-4">
+                <div className="h-1 w-12 sm:w-16 rounded-full bg-gradient-to-r from-pink-500 to-rose-500" />
                 <h2
                   className="text-lg sm:text-4xl font-bold text-white text-center leading-tight"
                   style={{ fontFamily: "'Macondo', cursive" }}

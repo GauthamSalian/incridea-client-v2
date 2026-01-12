@@ -50,7 +50,7 @@ export default function JoinTeamModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-lg p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-3xl border border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,255,255,0.15)] p-6 sm:p-8 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-cyan-500/10 before:via-fuchsia-500/8 before:to-emerald-500/10 before:blur-2xl before:-z-10">
         <button
           onClick={onClose}
