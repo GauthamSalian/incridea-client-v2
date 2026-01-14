@@ -27,9 +27,8 @@ function Layout() {
     window.location.href = `${import.meta.env.VITE_AUTH_URL}/`
   }
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true)
+  const fetchProfile = async () => {
+      // setIsLoading(true) // Don't flicker loading on focus check
       try {
         const { user } = await fetchMe()
         const name = user && typeof user === 'object'
@@ -45,10 +44,13 @@ function Layout() {
           setUserName(name)
           setToken('logged-in')
           localStorage.setItem('userName', name)
+          if (!localStorage.getItem('token')) {
+              localStorage.setItem('token', 'cookie-session')
+          }
         }
 
       } catch {
-        // If auth fails, just clear local state but don't redirect
+        // If auth fails, just clear local state
         localStorage.removeItem('token')
         localStorage.removeItem('userName')
         localStorage.removeItem('userId')
@@ -59,6 +61,7 @@ function Layout() {
       }
     }
 
+  useEffect(() => {
     void fetchProfile()
 
     const handleStorageChange = (event: StorageEvent) => {
