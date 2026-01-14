@@ -89,7 +89,7 @@ const EventCard = ({ event, index }: EventCardProps) => {
             </div>
 
             {/* Event Name - Reduced slightly for better fit */}
-            <div className="ml-1 mt-3 mb-1 text-[12px] font-bold uppercase tracking-[1.5px] text-white/90 truncate">
+            <div className="ml-1 mt-3 mb-1 text-[12px] font-bold uppercase tracking-[1.5px] text-white/90 truncate cursor-target">
               {event.name}
             </div>
 

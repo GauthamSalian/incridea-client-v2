@@ -40,6 +40,7 @@ function Layout() {
               : null
           : null
 
+
         if (name) {
           setUserName(name)
           setToken('logged-in')
@@ -59,6 +60,27 @@ function Layout() {
     }
 
     void fetchProfile()
+
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === 'token' && event.newValue === null) {
+            setToken(null)
+            setUserName(null)
+            // No strict redirect for client as guest view is allowed
+        }
+    }
+
+    const handleFocus = () => {
+       // Re-verify session when returning to the tab
+       void fetchProfile() 
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange)
+        window.removeEventListener('focus', handleFocus)
+    }
   }, [])
 
   return (
