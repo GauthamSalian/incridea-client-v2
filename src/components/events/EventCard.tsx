@@ -1,85 +1,142 @@
-import { MapPin, Calendar, Users } from 'lucide-react';
+import { MapPin, Calendar, Users } from "lucide-react";
+import type { PublicEvent } from "../../api/public";
+import { formatDate } from "../../utils/date";
+
+const CATEGORY_THEMES = {
+  TECHNICAL: {
+    color: "#60a5fa",
+    glow: "rgba(59, 130, 246, 0.5)",
+    label: "TECH",
+  },
+  NON_TECHNICAL: {
+    color: "#34d399",
+    glow: "rgba(16, 185, 129, 0.5)",
+    label: "NON-TECH",
+  },
+  CORE: { color: "#c084fc", glow: "rgba(168, 85, 247, 0.5)", label: "CORE" },
+  SPECIAL: {
+    color: "#fb7185",
+    glow: "rgba(244, 63, 94, 0.5)",
+    label: "SPECIAL",
+  },
+  DEFAULT: {
+    color: "#cbd5e1",
+    glow: "rgba(255, 255, 255, 0.2)",
+    label: "EVENT",
+  },
+};
 
 interface EventCardProps {
-  imageUrl?: string;
+  event: PublicEvent;
+  index: number;
 }
 
-const EventCard = ({
-  imageUrl = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"
-}: EventCardProps) => {
-  // The SVG mask data URI
-  // This defines the specific S-Curve / notched shape
+const EventCard = ({ event, index }: EventCardProps) => {
+  const firstRoundWithDate = event.rounds.find((round) => round.date);
+  const theme =
+    CATEGORY_THEMES[event.category as keyof typeof CATEGORY_THEMES] ||
+    CATEGORY_THEMES.DEFAULT;
+
+  const teamSizeText =
+    event.minTeamSize === event.maxTeamSize
+      ? event.minTeamSize === 1
+        ? "Solo"
+        : `${event.minTeamSize} per team`
+      : `${event.minTeamSize}-${event.maxTeamSize} per team`;
+
   const maskImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1452 2447'%3E%3Cpath d='M80 0h1292c44 0 80 36 80 80v2050c0 44-36 80-80 80h-480c-40 0-70 30-90 65-30 55-50 172-110 172H80c-44 0-80-36-80-80V80C0 36 36 0 80 0z'/%3E%3C/svg%3E")`;
 
   return (
-    <div className="flex w-full items-center justify-center p-12 font-sans">
-
-      {/* Positioning Wrapper (Group for hover) */}
+    <div
+      className={`flex items-center justify-center p-4 font-sans transition-all duration-500 hover:-translate-y-4 hover:z-50 ${
+        index % 2 !== 0 ? "lg:mt-24" : "mt-0"
+      }`}
+    >
       <div className="relative w-[300px] aspect-[1452/2447.19] group">
-
-        {/* Masked Layer (The Card Shape) */}
         <div
           className="absolute inset-0 z-10"
           style={{
             WebkitMaskImage: maskImage,
             maskImage: maskImage,
-            WebkitMaskSize: '100% 100%',
-            maskSize: '100% 100%',
+            WebkitMaskSize: "100% 100%",
+            maskSize: "100% 100%",
           }}
         >
           {/* Inner Content Area (Glass Effect) */}
-          <div className="flex h-full w-full flex-col gap-[8px] border border-white/25 bg-white/11 p-[20px_16px_10px] backdrop-blur-[30px]">
+          <div
+            className="flex h-full w-full flex-col gap-[8px] border border-white/10 p-[20px_16px_10px] backdrop-blur-[20px] transition-all duration-500 group-hover:border-white/30"
+            style={{
+              backgroundColor: "rgba(18, 20, 28, 0.6)",
+            }}
+          >
+            <div
+              className="pointer-events-none absolute inset-0 animate-shine bg-[linear-gradient(120deg,transparent_35%,rgba(255,255,255,0.05)_50%,transparent_65%)] bg-size-[280%_100%]"
+              style={{
+                animationDuration: `${10 + (index % 5) * 2}s`,
+                animationDelay: `${(index % 7) * 0.5}s`,
+              }}
+            />
 
-            {/* Shimmer Effect */}
-            {/* Note: Requires the custom keyframe defined in styles below or tailwind config */}
-            <div className="pointer-events-none absolute inset-0 animate-shine bg-[linear-gradient(120deg,transparent_35%,rgba(255,255,255,0.09)_50%,transparent_65%)] bg-size-[280%_100%]" />
-
-            {/* Image Block (1080x1350 Ratio) */}
-            <div className="mb-[6px] w-full aspect-1080/1350 rounded-[16px] overflow-hidden bg-black/30 border border-white/20">
+            <div className="mb-[6px] w-full aspect-1080/1350 rounded-[16px] overflow-hidden bg-black/40 border border-white/10">
               <img
-                src={imageUrl}
-                alt="Event"
-                className="w-full h-full object-cover"
+                src={
+                  event.image ||
+                  "https://www.shutterstock.com/image-vector/girl-holding-open-book-reading-600nw-1470580109.jpg"
+                }
+                alt={event.name}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
               />
             </div>
 
-            {/* Event Title */}
-            {/* Event Title */}
-            <div className="ml-1 mt-3 mb-1 text-[13px] font-bold uppercase tracking-[1.5px] text-white/90 truncate">
-              EVENT NAME
+            {/* Event Name - Reduced slightly for better fit */}
+            <div className="ml-1 mt-3 mb-1 text-[12px] font-bold uppercase tracking-[1.5px] text-white/90 truncate">
+              {event.name}
             </div>
 
             {/* Details */}
-            <div className="mt-auto space-y-2 pb-5 pl-1">
+            <div className="mt-auto space-y-2 pb-5 pl-1 pr-1">
               {/* Date */}
-              <div className="flex h-[32px] w-[230px] items-center gap-[8px] rounded-full border border-white/13 bg-white/8.5 px-3 backdrop-blur-[6px] text-white pl-5">
-                <Calendar size={13} className="opacity-80" />
-                <span className="text-[11px] font-medium tracking-wide">5 Mar, 9.30 AM</span>
+              <div className="flex h-[32px] w-full items-center gap-[8px] rounded-md border border-white/5 bg-white/5 px-4 backdrop-blur-xs text-white/80">
+                <Calendar size={12} className="opacity-70 shrink-0" />
+                <span className="text-[10.5px] font-medium tracking-wide truncate">
+                  {firstRoundWithDate
+                    ? formatDate(firstRoundWithDate.date)
+                    : "TBD"}
+                </span>
               </div>
 
               {/* Team */}
-              <div className="flex h-[32px] w-[230px] items-center gap-[8px] rounded-full border border-white/13 bg-white/8.5 px-3 backdrop-blur-[6px] text-white pl-5">
-                <Users size={13} className="opacity-80" />
-                <span className="text-[11px] font-medium tracking-wide">5 per team</span>
+              <div className="flex h-[32px] w-full items-center gap-[8px] rounded-md border border-white/5 bg-white/5 px-4 backdrop-blur-xs text-white/80">
+                <Users size={12} className="opacity-70 shrink-0" />
+                <span className="text-[10.5px] font-medium tracking-wide truncate">
+                  {teamSizeText}
+                </span>
               </div>
 
               {/* Location */}
-              <div className="flex h-[32px] w-[130px] items-center gap-[8px] rounded-full border border-white/13 bg-white/8.5 px-3 backdrop-blur-[6px] text-white pl-5">
-                <MapPin size={13} className="opacity-80" />
-                <span className="text-[11px] font-medium tracking-wide">NITTE</span>
+              <div className="flex h-[32px] w-fit min-w-[100px] items-center gap-[8px] rounded-md border border-white/5 bg-white/5 px-4 backdrop-blur-xs text-white/80">
+                <MapPin size={12} className="opacity-70 shrink-0" />
+                <span className="text-[10.5px] font-medium tracking-wide truncate">
+                  {event.venue || "NITTE"}
+                </span>
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* CORE (Outside Mask) */}
-        <div className="absolute bottom-[1.5%] right-[8%] text-[20px] tracking-[0.25em] text-white/40 group-hover:text-white/60 transition font-bold select-none pointer-events-none z-0">
-          CORE
+        {/* Dynamic Category Tag - 1/4th size reduction + Theme Colors */}
+        <div
+          className="absolute bottom-[2.5%] right-[8%] text-[10px] tracking-[0.4em] font-black select-none pointer-events-none z-20 transition-all duration-700 uppercase"
+          style={{
+            color: theme.color,
+            textShadow: `0 0 10px ${theme.glow}`,
+            filter: `drop-shadow(0 0 2px ${theme.glow})`,
+          }}
+        >
+          {theme.label}
         </div>
       </div>
 
-      {/* Inject custom keyframes for the shimmer animation */}
       <style>{`
         @keyframes shine {
           0% { background-position: 200% 0; }

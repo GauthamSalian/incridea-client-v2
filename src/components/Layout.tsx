@@ -4,6 +4,7 @@ import Navbar from './Navbar'
 
 import { logoutUser, fetchMe } from '../api/auth'
 
+
 function Layout() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('userName') ? 'logged-in' : null)
   const [userName, setUserName] = useState<string | null>(localStorage.getItem('userName'))
