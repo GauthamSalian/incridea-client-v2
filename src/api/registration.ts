@@ -1,12 +1,15 @@
 import apiClient from './client'
 
 export interface TeamMember {
-  userId: number
+  id: number
+  pidId: number
   teamId: number
-  User?: {
-    id: number
-    name: string
-    email: string
+  PID?: {
+    User: {
+      id: number
+      name: string
+      email: string
+    }
   }
 }
 
@@ -17,6 +20,13 @@ export interface Team {
   leaderId: number
   confirmed: boolean
   TeamMembers: TeamMember[]
+  Leader?: {
+    User: {
+      id: number
+      name: string
+      email: string
+    }
+  }
 }
 
 export async function registerSoloEvent(eventId: number) {
