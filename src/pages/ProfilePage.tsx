@@ -42,9 +42,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!token) {
-      // Temporarily allow access without token for testing
-      console.warn("No token found - profile data will not load");
-      // void navigate('/')
+      void navigate("/");
     }
   }, [token, navigate]);
 
