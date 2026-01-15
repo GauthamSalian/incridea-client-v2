@@ -19,7 +19,7 @@ const Glass = <T extends React.ElementType = "div">({
 
   return (
     <Component
-      className={`relative overflow-hidden border border-white/10 backdrop-blur-[20px] transition-all duration-500 ${
+      className={`relative overflow-hidden backdrop-blur-[5px] transition-all duration-500 ${
         hoverEffect ? "hover:border-white/30" : ""
       } ${className}`}
       style={{

@@ -1,4 +1,4 @@
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
@@ -11,11 +11,15 @@
   }
 }
 
-/* Hide scrollbar globally */
+/* Aggressively hide scrollbars globally for WebKit browsers */
 ::-webkit-scrollbar {
   display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
+/* Ensure scrollbar width is none for Firefox on all elements */
 * {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
@@ -32,6 +36,18 @@
 
 .animate-slow-spin {
   animation: slow-spin 6s linear infinite;
+}
+
+@keyframes floating {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(15px, -25px) rotate(2deg); }
+  66% { transform: translate(-10px, 15px) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-float {
+  animation: floating 8s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes shine {

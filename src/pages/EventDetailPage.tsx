@@ -2,8 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AiOutlineArrowLeft, AiOutlinePhone } from "react-icons/ai";
-import { BiTimeFive } from "react-icons/bi";
-import { BsCalendarDate } from "react-icons/bs";
+
 import {
   fetchPublishedEvent,
   type PublicEventDetail,
@@ -13,7 +12,7 @@ import {
 import { showToast } from "../utils/toast";
 import EventRegistration from "../components/events/EventRegistration";
 import EventDetails from "../components/events/EventDetails";
-import { formatDate as formatDateIST, formatTime } from "../utils/date";
+import { formatDate as formatDateIST } from "../utils/date";
 import Glass from "../components/ui/Glass";
 
 function parseIdFromSlug(slug: string | undefined) {
@@ -342,38 +341,7 @@ function EventDetailPage() {
           </div>
         </Glass>
 
-        {/* Schedule Section */}
-        {event.rounds.length > 0 && (
-          <div className="space-y-4 sm:space-y-6">
-            <h2 className="text-xl sm:text-3xl font-bold text-white leading-tight">
-              Schedule
-            </h2>
-            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
-              {event.rounds.map((round) => (
-                <div
-                  key={round.roundNo}
-                  className="rounded-2xl border border-white/15 bg-white/8 backdrop-blur-md p-5 hover:border-sky-500/50 hover:shadow-[0_0_20px_rgba(14,165,233,0.15)] transition-all group"
-                >
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-sm font-bold text-white px-3 py-1 rounded-lg bg-sky-500/20 group-hover:bg-sky-500/30 transition-colors">
-                      Round {round.roundNo}
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-sm text-white/80">
-                    <div className="flex items-center gap-2">
-                      <BsCalendarDate className="text-white/60" />
-                      <span>{formatDateIST(round.date)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <BiTimeFive className="text-white/60" />
-                      <span>{round.date ? formatTime(round.date) : "TBD"}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
     </section>
     </>

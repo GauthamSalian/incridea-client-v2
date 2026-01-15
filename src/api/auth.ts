@@ -131,7 +131,7 @@ export async function requestPasswordReset(
 export async function resetPasswordConfirm(
   payload: ResetPasswordConfirmPayload,
 ): Promise<ResetPasswordResponse> {
-  const { data } = await apiClient.post<ResetPasswordResponse>('/auth/reset-password-confirm', payload)
+  const { data } = await apiClient.post<ResetPasswordResponse>('/auth/reset-password', payload)
   return data
 }
 

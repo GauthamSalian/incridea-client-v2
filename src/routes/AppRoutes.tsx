@@ -30,7 +30,7 @@ const AuthRedirect = () => {
 }
 
 const ResetRedirect = () => {
-    window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password`;
+    window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password${window.location.search}`;
     return null;
 }
 

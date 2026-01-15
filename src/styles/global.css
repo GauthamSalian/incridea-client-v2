@@ -61,3 +61,28 @@
     @apply rounded bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-white/15;
   }
 }
+
+@keyframes floating1 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(10px, -10px) rotate(1deg); }
+  66% { transform: translate(-5px, 8px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes floating2 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-10px, -8px) rotate(-1deg); }
+  66% { transform: translate(8px, 10px) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes floating3 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  40% { transform: translate(8px, 8px) rotate(1deg); }
+  70% { transform: translate(-8px, -8px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.animate-float {
+  will-change: transform;
+}
