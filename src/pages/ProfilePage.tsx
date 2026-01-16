@@ -18,8 +18,9 @@ import {
 } from "../api/auth";
 import { useForm } from "react-hook-form";
 import { showToast } from "../utils/toast";
-import { Pencil } from "lucide-react";
+import { Pencil, QrCode } from "lucide-react";
 import LiquidGlassCard from "../components/liquidglass/LiquidGlassCard";
+import InfiniteScroll from "../components/InfiniteScroll";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ function ProfilePage() {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editFullName, setEditFullName] = useState("");
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
 
   const toErrorMessage = (error: unknown, fallback: string) =>
     error instanceof Error ? error.message : fallback;
@@ -135,6 +138,9 @@ function ProfilePage() {
       className="fixed inset-0 bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{ backgroundImage: "url('/temp_event_bg.png')" }}
     >
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=New+Rocker&display=swap');`}
+      </style>
       <div className="absolute inset-0 bg-black/40"></div>
       <section className="relative h-screen overflow-y-auto pt-32 md:pt-24 pb-12 flex flex-col items-center justify-start">
         {/* Profile Card */}
@@ -155,30 +161,38 @@ function ProfilePage() {
                   Edit profile
                 </span>
               </button>
-              <div className="flex flex-col md:flex-row items-center gap-0 md:gap-0">
+              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-0">
                 {/* Avatar Circle - Overlapping */}
-                <div className="flex-shrink-0 md:-mr-20 z-10 -mb-12 md:mb-0">
-                  <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center shadow-xl">
-                    <span className="text-4xl md:text-6xl text-slate-800 font-semibold">
+                <div className="flex-shrink-0 md:-mr-20 z-10 md:mb-0 relative flex items-center justify-center">
+                  <div
+                    className={`w-28 h-28 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center shadow-xl transition-transform duration-500 ${
+                      isRotating ? "rotate-180" : "rotate-0"
+                    }`}
+                  >
+                    <span className="text-3xl md:text-5xl text-slate-800 font-semibold">
                       {userName.charAt(0).toUpperCase()}
                     </span>
                   </div>
+                  {/* QR Code Button */}
+                  <button
+                    onClick={() => {
+                      setIsRotating(true);
+                      setTimeout(() => {
+                        setShowQRCode(true);
+                        setIsRotating(false);
+                      }, 500);
+                    }}
+                    className="absolute bottom-0 left-0 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 hover:scale-110 group border border-white/20"
+                    title="Show QR Code"
+                  >
+                    <QrCode className="w-4 h-4 md:w-5 md:h-5 text-slate-200 group-hover:text-white" />
+                  </button>
                 </div>
 
                 {/* Profile Info & Buttons - Purple Glass Container */}
                 <div className="flex-1 w-full md:pl-16">
-                  <LiquidGlassCard
-                    colorScheme="orange"
-                    className="rounded-2xl min-h-48 flex items-center justify-center p-2 md:p-1.5 pt-4 md:pt-1.5"
-                  >
+                  <LiquidGlassCard className="rounded-2xl min-h-48 flex items-center justify-center p-2 md:p-1.5 pt-4 md:pt-1.5">
                     <div className="space-y-3 md:space-y-4 w-full p-1 md:p-1.5">
-                      {/* Email Address */}
-                      <div className="text-center">
-                        <p className="text-sm text-slate-300">
-                          {userEmail || "No email"}
-                        </p>
-                      </div>
-
                       {/* Name */}
                       <div className="text-center">
                         <p className="text-2xl md:text-3xl font-semibold text-slate-50">
@@ -196,14 +210,14 @@ function ProfilePage() {
                       {/* Buttons */}
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
-                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors duration-200 w-full sm:w-60"
+                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-60"
                           type="button"
                           onClick={() => setShowChangePassword(true)}
                         >
                           Change password
                         </button>
                         <button
-                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors duration-200 w-full sm:w-60"
+                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-60"
                           type="button"
                           onClick={() => {
                             localStorage.removeItem("token");
@@ -228,94 +242,142 @@ function ProfilePage() {
           <LiquidGlassCard className="p-6 md:p-8">
             {/* Header */}
             <div className="flex justify-center mb-8">
-              <div className="inline-block px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 backdrop-blur-sm">
-                <p className="text-sm font-semibold text-white-200">
-                  My Missions
-                </p>
-              </div>
+              <h2
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-400"
+                style={{ fontFamily: "'New Rocker', cursive" }}
+              >
+                My Missions
+              </h2>
             </div>
 
             {/* Mission Cards Container */}
-            <div className="overflow-x-auto scrollbar-hide">
-              <div className="flex gap-6 pb-4 flex-nowrap scroll-smooth whitespace-nowrap">
-                {/* Hardcoded Mission Cards */}
-                {[
-                  {
-                    title: "Hackathon 2026",
-                    code: "HX7K2P9",
-                    image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  },
-                  {
-                    title: "Code Sprint Championship",
-                    code: "CS9M4L1",
-                    image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                  },
-                  {
-                    title: "Web Dev Masters",
-                    code: "WD2X8B5",
-                    image: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-                  },
-                  {
-                    title: "AI Innovation Summit",
-                    code: "AI6P3K7",
-                    image: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-                  },
-                  {
-                    title: "Design Bootcamp",
-                    code: "DB1N9R4",
-                    image: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-                  },
-                ].map((mission, index) => (
-                  <LiquidGlassCard
-                    key={index}
-                    colorScheme="orange"
-                    className="flex-none shrink-0 !w-49 !max-w-49 overflow-hidden p-3 flex flex-col"
+            <InfiniteScroll
+              items={[
+                {
+                  title: "Hackathon 2026",
+                  code: "HX7K2P9",
+                  image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                },
+                {
+                  title: "Code Sprint Championship",
+                  code: "CS9M4L1",
+                  image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                },
+                {
+                  title: "Web Dev Masters",
+                  code: "WD2X8B5",
+                  image: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                },
+                {
+                  title: "AI Innovation Summit",
+                  code: "AI6P3K7",
+                  image: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+                },
+                {
+                  title: "Design Bootcamp",
+                  code: "DB1N9R4",
+                  image: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+                },
+              ].map((mission) => (
+                <LiquidGlassCard
+                  key={mission.code}
+                  className="!w-49 !max-w-49 overflow-hidden !p-4.5 flex flex-col gap-2"
+                >
+                  {/* Mission Image/Poster */}
+                  <div
+                    className="w-full h-[140px] sm:h-[160px] md:h-[180px] bg-cover bg-center relative overflow-hidden rounded-xl flex-shrink-0"
+                    style={{
+                      backgroundImage: mission.image,
+                    }}
                   >
-                    {/* Mission Image/Poster */}
-                    <div
-                      className=" h-[120px] sm:h-[140px] md:h-[160px] bg-cover bg-center relative overflow-hidden rounded-lg flex-shrink-0"
-                      style={{
-                        backgroundImage: mission.image,
-                        aspectRatio: "4 / 5",
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
+                  </div>
+
+                  {/* Mission Card Content */}
+                  <div className="flex-1 flex flex-col space-y-1.5 overflow-hidden">
+                    {/* Event Title */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-50 line-clamp-1">
+                        {mission.title}
+                      </h3>
+                    </div>
+
+                    {/* Venue Field */}
+                    <div className="flex items-center justify-between bg-slate-900/40 rounded px-1.5 py-1">
+                      <span className="text-xs text-slate-400">VENUE:</span>
+                      <span className="text-xs font-semibold text-amber-300">
+                        TBA
+                      </span>
+                    </div>
+
+                    {/* Time Field */}
+                    <div className="flex items-center justify-between bg-slate-900/40 rounded px-1.5 py-1">
+                      <span className="text-xs text-slate-400">TIME:</span>
+                      <span className="text-xs font-semibold text-amber-300">
+                        TBA
+                      </span>
+                    </div>
+
+                    {/* Action Button - anchored to bottom */}
+                    <button
+                      className="w-full py-1.5 px-2 rounded bg-orange-600/60 hover:bg-orange-600/80 text-slate-100 text-xs font-medium transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/30 mt-auto"
+                      onClick={() => {
+                        showToast("More details coming soon!", "info");
                       }}
                     >
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
-                    </div>
-
-                    {/* Mission Card Content */}
-                    <div className="flex-1 flex flex-col p-2 space-y-2 overflow-hidden">
-                      {/* Event Title */}
-                      <div>
-                        <h3 className="text-xs font-semibold text-slate-50 line-clamp-2">
-                          {mission.title}
-                        </h3>
-                      </div>
-
-                      {/* Participation Code */}
-                      <div className="flex items-center justify-between bg-slate-900/40 rounded px-2 py-1.5">
-                        <span className="text-xs text-slate-400">CODE:</span>
-                        <span className="text-xs font-mono font-bold text-amber-300">
-                          {mission.code}
-                        </span>
-                      </div>
-
-                      {/* Action Button - anchored to bottom */}
-                      <button
-                        className="w-full py-2 px-2 rounded bg-orange-600/60 hover:bg-orange-600/80 text-slate-100 text-xs font-medium transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/30 mt-auto"
-                        onClick={() => {
-                          navigator.clipboard.writeText(mission.code);
-                          showToast(`Copied code: ${mission.code}`, "success");
-                        }}
-                      >
-                        Copy Code
-                      </button>
-                    </div>
-                  </LiquidGlassCard>
-                ))}
-              </div>
-            </div>
+                      Details
+                    </button>
+                  </div>
+                </LiquidGlassCard>
+              ))}
+              speed="normal"
+              gap="gap-6"
+              itemWidth="w-49"
+              pauseOnHover={true}
+              autoScroll={false}
+            />
           </LiquidGlassCard>
         </div>
+
+        {showQRCode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-1 md:p-1.5 backdrop-blur">
+            <LiquidGlassCard
+              className="
+                !w-[92%] sm:!w-[70%] md:!w-[45%] lg:!w-[25%]
+                !max-w-[92%] sm:!max-w-[70%] md:!max-w-[45%] lg:!max-w-[25%]
+                flex-none space-y-4 p-6
+              "
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="muted">Your Profile</p>
+                  <h3 className="text-lg font-semibold text-slate-50">
+                    QR Code
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  className="text-sm text-slate-300 hover:text-sky-300"
+                  onClick={() => setShowQRCode(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="flex flex-col items-center space-y-4">
+                {/* QR Code Placeholder */}
+                <div className="w-64 h-64 bg-white rounded-lg p-4 flex items-center justify-center">
+                  <div className="w-full h-full bg-slate-200 rounded flex items-center justify-center">
+                    <QrCode className="w-32 h-32 text-slate-400" />
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 text-center">
+                  Scan this QR code
+                </p>
+              </div>
+            </LiquidGlassCard>
+          </div>
+        )}
 
         {showEditProfile && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-1 md:p-1.5 backdrop-blur">
