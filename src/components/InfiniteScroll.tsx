@@ -34,8 +34,8 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
     speed === "slow"
       ? "animate-scroll-slow"
       : speed === "fast"
-      ? "animate-scroll-fast"
-      : "animate-scroll";
+        ? "animate-scroll-fast"
+        : "animate-scroll";
 
   const directionClass = direction === "right" ? "animate-scroll-reverse" : "";
 

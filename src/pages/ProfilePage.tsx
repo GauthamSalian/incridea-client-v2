@@ -42,13 +42,13 @@ function ProfilePage() {
   > = (payload) =>
     (
       requestPasswordReset as (
-        input: ResetPasswordRequestPayload
+        input: ResetPasswordRequestPayload,
       ) => Promise<ResetPasswordResponse>
     )(payload);
 
   useEffect(() => {
     if (!token) {
-      /*void navigate("/");*/
+      void navigate("/");
     }
   }, [token, navigate]);
 
@@ -111,7 +111,7 @@ function ProfilePage() {
   });
 
   const onSubmit = form.handleSubmit((values) =>
-    changePasswordMutation.mutate(values)
+    changePasswordMutation.mutate(values),
   );
 
   const user = profileQuery.data?.user;
@@ -144,7 +144,7 @@ function ProfilePage() {
       <div className="absolute inset-0 bg-black/40"></div>
       <section className="relative h-screen overflow-y-auto pt-32 md:pt-24 pb-12 flex flex-col items-center justify-start">
         {/* Profile Card */}
-        <div className="w-full max-w-[95%] sm:max-w-[60%] mt-4">
+        <div className="w-full max-w-[95%] sm:max-w-[85%] md:max-w-[70%] lg:max-w-[60%] mt-4 px-2 sm:px-4">
           <div className="relative">
             <LiquidGlassCard className="p-4 md:p-6">
               {/* Edit Profile Button */}
@@ -161,9 +161,9 @@ function ProfilePage() {
                   Edit profile
                 </span>
               </button>
-              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-0">
+              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 lg:gap-0">
                 {/* Avatar Circle - Overlapping */}
-                <div className="flex-shrink-0 md:-mr-20 z-10 md:mb-0 relative flex items-center justify-center">
+                <div className="flex-shrink-0 lg:-mr-20 z-10 md:mb-0 relative flex items-center justify-center">
                   <div
                     className={`w-28 h-28 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center shadow-xl transition-transform duration-500 ${
                       isRotating ? "rotate-180" : "rotate-0"
@@ -190,9 +190,9 @@ function ProfilePage() {
                 </div>
 
                 {/* Profile Info & Buttons - Purple Glass Container */}
-                <div className="flex-1 w-full md:pl-16">
-                  <LiquidGlassCard className="rounded-2xl min-h-48 flex items-center justify-center p-2 md:p-1.5 pt-4 md:pt-1.5">
-                    <div className="space-y-3 md:space-y-4 w-full p-1 md:p-1.5">
+                <div className="flex-1 w-full max-w-full min-w-0 md:pl-8 lg:pl-16">
+                  <LiquidGlassCard className="rounded-2xl min-h-48 flex items-center justify-center p-4 md:p-6 w-full max-w-full">
+                    <div className="space-y-3 md:space-y-4 w-full max-w-full min-w-0">
                       {/* Name */}
                       <div className="text-center">
                         <p className="text-2xl md:text-3xl font-semibold text-slate-50">
@@ -208,16 +208,16 @@ function ProfilePage() {
                       </div>
 
                       {/* Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center items-stretch">
                         <button
-                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-60"
+                          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-[10rem] sm:max-w-[15rem]"
                           type="button"
                           onClick={() => setShowChangePassword(true)}
                         >
                           Change password
                         </button>
                         <button
-                          className="p-1.5 md:p-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-60"
+                          className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-3xl transition-colors duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-[10rem] sm:max-w-[15rem]"
                           type="button"
                           onClick={() => {
                             localStorage.removeItem("token");
@@ -254,6 +254,11 @@ function ProfilePage() {
             <InfiniteScroll
               items={[
                 {
+                  title: "Design Bootcamp",
+                  code: "DB1N9R4",
+                  image: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+                },
+                {
                   title: "Hackathon 2026",
                   code: "HX7K2P9",
                   image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -273,19 +278,14 @@ function ProfilePage() {
                   code: "AI6P3K7",
                   image: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
                 },
-                {
-                  title: "Design Bootcamp",
-                  code: "DB1N9R4",
-                  image: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-                },
               ].map((mission) => (
                 <LiquidGlassCard
                   key={mission.code}
-                  className="!w-49 !max-w-49 overflow-hidden !p-4.5 flex flex-col gap-2"
+                  className="!w-49 !max-w-49 !p-4.5 flex flex-col gap-2"
                 >
                   {/* Mission Image/Poster */}
                   <div
-                    className="w-full h-[140px] sm:h-[160px] md:h-[180px] bg-cover bg-center relative overflow-hidden rounded-xl flex-shrink-0"
+                    className="w-full aspect-[4/5] bg-cover bg-center relative overflow-hidden rounded-xl flex-shrink-0 object-cover"
                     style={{
                       backgroundImage: mission.image,
                     }}
@@ -390,8 +390,7 @@ function ProfilePage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="muted">Account</p>
-                  <h3 className="text-lg font-semibold text-slate-50">
+                  <h3 className="text-lg font-semibold text-slate-50 p-0.5">
                     Edit profile
                   </h3>
                 </div>
@@ -404,7 +403,7 @@ function ProfilePage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 mt-1">
                 <div className="space-y-2">
                   <label className="label" htmlFor="fullName">
                     Full Name
@@ -418,9 +417,9 @@ function ProfilePage() {
                     placeholder="Enter your full name"
                   />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="mt-2 flex justify-center items-center gap-1.5">
                   <button
-                    className="button"
+                    className="button bg-orange-500 hover:bg-orange-600 px-5 py-1.5 rounded-md text-white text-base font-medium transition"
                     type="button"
                     onClick={() => {
                       if (editFullName.trim()) {
@@ -434,7 +433,7 @@ function ProfilePage() {
                     Save
                   </button>
                   <button
-                    className="button secondary"
+                    className="button secondary bg-slate-600 hover:bg-slate-700 px-5 py-1.5 rounded-md text-white text-base font-medium transition"
                     type="button"
                     onClick={handleCloseModal}
                   >
