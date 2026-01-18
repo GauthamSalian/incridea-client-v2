@@ -80,14 +80,39 @@ export async function initiatePayment(registrationId: string) {
 }
 
 
+export async function verifyPaymentSignature(response: any) {
+  const { data } = await apiClient.post<any>('/payment/verify', response)
+  return data
+}
+
 export async function verifyPayment() {
   try {
-     const { data } = await apiClient.get<{ status: string; pid?: string; receipt?: string }>('/payment/my-status')
+     const { data } = await apiClient.get<any>('/payment/my-status')
      if (data.status === 'success' && data.pid && data.receipt) {
-         return { status: 'success', message: 'Payment verified', pid: data.pid, receipt: data.receipt }
+         return { 
+           status: 'success', 
+           message: 'Payment verified', 
+           pid: data.pid, 
+           receipt: data.receipt, 
+           processingStep: 'COMPLETED'
+         }
+     }
+     if (data.status === 'processing' || data.status === 'pending') {
+        return {
+          status: 'pending',
+          message: data.message || 'Processing...',
+          processingStep: data.processingStep 
+        }
+     }
+     if (data.status === 'failed') {
+         return {
+             status: 'failed',
+             message: data.message || 'Payment Verification Failed',
+             processingStep: null
+         }
      }
   } catch (e) {
     // Ignore error
   }
-  return { status: 'pending', message: 'Payment verification pending' }
+  return { status: 'pending', message: 'Payment verification pending', processingStep: null }
 }

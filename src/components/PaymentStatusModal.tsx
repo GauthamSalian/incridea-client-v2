@@ -86,25 +86,49 @@ export default function PaymentStatusModal({
   // Use a ref to prevent double verification if component re-renders
   const verificationAttempted = useRef(false)
 
+  const [processingMessage, setProcessingMessage] = useState('Verifying Payment...')
+  
   useEffect(() => {
-    if (isOpen && status === 'PENDING' && !verificationAttempted.current) {
-      verificationAttempted.current = true
-      
-      const timer = setTimeout(async () => {
+    let intervalId: ReturnType<typeof setInterval>
+
+    if (isOpen && status === 'PENDING') {
+      const pollStatus = async () => {
         try {
           const verificationResponse = await verifyPayment()
-          if (verificationResponse.pid) {
-            onVerificationResult?.({ success: true, pid: verificationResponse.pid })
+          
+          if (verificationResponse.status === 'success' && verificationResponse.pid) {
+             onVerificationResult?.({ success: true, pid: verificationResponse.pid })
+             return true // Stop polling
+          } else if (verificationResponse.status === 'failed') {
+             onVerificationResult?.({ success: false }) 
+             return true
           } else {
-            onVerificationResult?.({ success: false })
+             // Update message based on step
+             const step = verificationResponse.processingStep
+             if (step === 'GENERATING_RECEIPT') setProcessingMessage('Generating Payment Receipt...')
+             else if (step?.startsWith('GENERATING_RECEIPT_RETRY')) setProcessingMessage('Retrying Receipt Generation...')
+             else if (step === 'SAVING_RECEIPT') setProcessingMessage('Saving Receipt to Profile...')
+             else if (step === 'GENERATING_PID') setProcessingMessage('Generating your Secret PID...')
+             else setProcessingMessage('Verifying Payment Details...')
+             
+             return false // Continue polling
           }
         } catch (error) {
           console.error(error)
-          onVerificationResult?.({ success: false })
+          return false
         }
-      }, 5000)
+      }
 
-      return () => clearTimeout(timer)
+      // Initial check
+      pollStatus()
+      
+      // Poll every 1s
+      intervalId = setInterval(async () => {
+        const stop = await pollStatus()
+        if (stop) clearInterval(intervalId)
+      }, 1000)
+
+      return () => clearInterval(intervalId)
     }
   }, [isOpen, status, onVerificationResult])
 
@@ -199,7 +223,7 @@ export default function PaymentStatusModal({
                     as="h3"
                     className="text-lg font-medium leading-6 text-white"
                   >
-                    {status === 'PENDING' && 'Verifying Payment...'}
+                    {status === 'PENDING' && processingMessage}
                     {status === 'SUCCESS' && 'Welcome to Incridea!'}
                     {status === 'FAILED' && 'Payment Verification Failed'}
                   </Dialog.Title>
@@ -207,7 +231,7 @@ export default function PaymentStatusModal({
                   <div className="mt-2">
                     <p className="text-sm text-slate-400">
                       {status === 'PENDING' &&
-                        'Please wait while we confirm your payment details...'}
+                        'Please do not close this window while we set up your profile.'}
                       {status === 'SUCCESS' && (
                         <div className="flex flex-col items-center">
                           Congratulations! You have successfully registered.

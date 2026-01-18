@@ -2,7 +2,6 @@ import { Route, Routes } from 'react-router-dom'
 import Layout from '../components/Layout.tsx'
 import HomePage from '../pages/HomePage.tsx'
 import NotFoundPage from '../pages/NotFoundPage.tsx'
-import TestPage from '../pages/TestPage.tsx'
 import ContactPage from '../pages/ContactPage.tsx'
 import AboutPage from '../pages/AboutPage.tsx'
 import RefundPage from '../pages/RefundPage.tsx'
@@ -54,7 +53,6 @@ function AppRoutes() {
 
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/accommodation" element={<AccommodationPage />} />
-        <Route path="/test" element={<TestPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

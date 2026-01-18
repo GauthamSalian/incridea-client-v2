@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { fetchRegistrationConfig, type RegistrationConfigResponse } from '../api/public'
-import { initiatePayment } from '../api/registration'
+import { initiatePayment, verifyPaymentSignature } from '../api/registration'
 import { fetchMe } from '../api/auth'
 import { showToast } from '../utils/toast'
 // verifyPayment removed from here, used in Modal now
@@ -200,11 +200,22 @@ function RegisterPage() {
              theme: {
                  color: '#460c78' 
              },
-             handler: async function () {
+             handler: async function (response: any) {
                 setModalState({ 
                   isOpen: true, 
                   status: 'PENDING',
                 })
+
+                try {
+                  await verifyPaymentSignature(response)
+                } catch (error) {
+                  console.error('Payment verification request failed', error)
+                  setModalState({
+                    isOpen: true,
+                    status: 'FAILED',
+                    pid: null,
+                  })
+                }
               },
               modal: {
                 ondismiss: async function () {
