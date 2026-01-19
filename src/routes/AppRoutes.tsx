@@ -14,6 +14,8 @@ import PrivacyPage from "../pages/PrivacyPage.tsx";
 import RulesPage from "../pages/RulesPage.tsx";
 import QuizPage from "../pages/QuizPage.tsx";
 import RegisterPage from "../pages/RegisterPage.tsx";
+import TechTeamPage from "../pages/techteam.tsx";
+import CoreTeamPage from "../pages/coreteam.tsx";
 
 const AuthRedirect = () => {
   const params = new URLSearchParams(window.location.search);
@@ -57,6 +59,8 @@ function AppRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/techteam" element={<TechTeamPage />} />
+        <Route path="/coreteam" element={<CoreTeamPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
