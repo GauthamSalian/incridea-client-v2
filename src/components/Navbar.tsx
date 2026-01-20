@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { User, LogOut } from "lucide-react";
+import { User } from "lucide-react";
+import MobileMenu from "./MobileMenu";
 
 interface NavbarProps {
   token: string | null;
@@ -44,7 +45,7 @@ const Navbar = ({
       </div>
 
       {/* Right User Section */}
-      <div className="flex items-center gap-2 md:gap-4 mt-12 lg:mt-8.5 ml-0 md:ml-60 justify-end">
+      <div className="flex items-center gap-2 md:gap-4 mt-10 lg:mt-8.5 ml-0 md:ml-60 justify-end">
         {token ? (
           <div className="flex items-center gap-2 md:gap-4">
             <a
@@ -58,6 +59,7 @@ const Navbar = ({
             <button
               onClick={onLogout}
               className="
+                hidden md:block
                 px-4 py-1.5 md:px-6 md:py-2 rounded-md
                 bg-[#5b21b6] hover:bg-[#4c1d95]
                 text-white font-['Orbitron'] font-bold tracking-wider text-sm md:text-sm
@@ -68,10 +70,7 @@ const Navbar = ({
               "
               title="Logout"
             >
-              <span className="hidden md:block skew-x-10">Logout</span>
-              <span className="md:hidden flex items-center justify-center skew-x-10">
-                <LogOut size={18} />
-              </span>
+              <span className="block skew-x-10">Logout</span>
             </button>
           </div>
         ) : (
@@ -79,18 +78,21 @@ const Navbar = ({
             <NavLink
               to="/login"
               className="
+                hidden md:block
                 px-4 py-1.5 md:px-6 md:py-2 rounded-md
                 bg-[#5b21b6] hover:bg-[#4c1d95]
                 text-white font-['Orbitron'] font-bold tracking-wider text-sm md:text-sm
                 uppercase
                 transition-all duration-300
                 skew-x-[-10deg]
+                mt-1
               "
             >
-              <span className="block skew-x-10">Sign In</span>
+              <span className="block skew-x-10 whitespace-nowrap">Sign In</span>
             </NavLink>
           )
         )}
+        <MobileMenu onLogout={onLogout} isAuthenticated={!!token} />
       </div>
     </div>
   );
