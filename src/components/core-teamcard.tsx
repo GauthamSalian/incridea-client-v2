@@ -25,7 +25,7 @@ const CoreTeamCard: React.FC<CoreTeamCardProps> = ({
                             <img
                                 src={imageSrc}
                                 alt={title}
-                                className="w-full h-full rounded-full object-cover"
+                                className="w-full h-full rounded-full object-cover transition-transform duration-500 ease-out scale-110 group-hover:scale-100"
                             />
                         ) : (
                             <div className="w-full h-full rounded-full bg-gradient-to-br from-white/10 to-transparent" />

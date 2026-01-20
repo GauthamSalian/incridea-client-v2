@@ -1,61 +1,6 @@
 @import "tailwindcss";
 
-@theme {
-  --animate-liquid: liquid 1s ease-in-out infinite;
-  --animate-slow-spin: slow-spin 6s linear infinite;
-  --animate-float: floating 8s ease-in-out infinite;
-  --animate-shine: shine 12s infinite linear;
-
-  @keyframes liquid {
-
-    0%,
-    100% {
-      transform: translateX(-50%);
-    }
-
-    50% {
-      transform: translateX(50%);
-    }
-  }
-
-  @keyframes slow-spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes floating {
-    0% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-
-    33% {
-      transform: translate(15px, -25px) rotate(2deg);
-    }
-
-    66% {
-      transform: translate(-10px, 15px) rotate(-2deg);
-    }
-
-    100% {
-      transform: translate(0, 0) rotate(0deg);
-    }
-  }
-
-  @keyframes shine {
-    0% {
-      background-position: 200% 0;
-    }
-
-    100% {
-      background-position: -200% 0;
-    }
-  }
-}
+@source "./src/**/*.{ts,tsx,html}";
 
 @layer base {
   :root {
@@ -68,19 +13,6 @@
 
   a {
     @apply text-sky-400 underline-offset-4 hover:text-sky-300;
-  }
-
-  /* Hide scrollbars globally */
-  ::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    background: transparent !important;
-  }
-
-  * {
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
   }
 }
 
@@ -127,16 +59,5 @@
 
   .toast-close {
     @apply rounded bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:bg-white/15;
-  }
-}
-
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }

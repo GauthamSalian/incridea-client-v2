@@ -4,12 +4,12 @@ import CoreTeamCard from '../components/core-teamcard'
 
 // Sample team members data - replace with actual data
 const teamMembers = [
-  { imageSrc: '/temp_event_bg.png', title: 'John Doe', subtitle: 'President' },
-  { imageSrc: '/temp_event_bg.png', title: 'Jane Smith', subtitle: 'Vice President' },
-  { imageSrc: '/temp_event_bg.png', title: 'Alex Johnson', subtitle: 'Secretary' },
-  { imageSrc: '/temp_event_bg.png', title: 'Sam Wilson', subtitle: 'Treasurer' },
-  { imageSrc: '/temp_event_bg.png', title: 'Chris Lee', subtitle: 'Event Coordinator' },
-  { imageSrc: '/temp_event_bg.png', title: 'Pat Brown', subtitle: 'Tech Lead' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'President' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'Vice President' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'Secretary' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'Treasurer' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'Event Coordinator' },
+  { imageSrc: '/chill.jpg', title: 'Adithya SN', subtitle: 'Tech Lead' },
 ];
 
 export default function CoreTeamPage() {
@@ -53,7 +53,7 @@ export default function CoreTeamPage() {
         </motion.h1>
 
         {/* Team Members Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 w-full max-w-6xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16 mt-16 w-full max-w-6xl justify-items-center">
           {teamMembers.map((member, index) => (
             <CoreTeamCard
               key={index}
