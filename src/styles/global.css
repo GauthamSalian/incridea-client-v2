@@ -1,6 +1,61 @@
 @import "tailwindcss";
 
-@source "./src/**/*.{ts,tsx,html}";
+@theme {
+  --animate-liquid: liquid 1s ease-in-out infinite;
+  --animate-slow-spin: slow-spin 6s linear infinite;
+  --animate-float: floating 8s ease-in-out infinite;
+  --animate-shine: shine 12s infinite linear;
+
+  @keyframes liquid {
+
+    0%,
+    100% {
+      transform: translateX(-50%);
+    }
+
+    50% {
+      transform: translateX(50%);
+    }
+  }
+
+  @keyframes slow-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes floating {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+
+    33% {
+      transform: translate(15px, -25px) rotate(2deg);
+    }
+
+    66% {
+      transform: translate(-10px, 15px) rotate(-2deg);
+    }
+
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+  @keyframes shine {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
 
 @layer base {
   :root {
@@ -8,17 +63,30 @@
   }
 
   body {
-    @apply min-h-screen text-slate-50 antialiased;
+    @apply min-h-screen bg-slate-950 text-slate-50 antialiased;
   }
 
   a {
     @apply text-sky-400 underline-offset-4 hover:text-sky-300;
   }
+
+  /* Hide scrollbars globally */
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-slate-800 bg-slate-950/30 backdrop-blur-xl shadow-xl shadow-slate-950/40;
+    @apply rounded-2xl border border-slate-800 bg-slate-900/70 shadow-xl shadow-slate-950/40;
   }
 
   .button {
@@ -62,29 +130,13 @@
   }
 }
 
-@keyframes floating1 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(10px, -10px) rotate(1deg); }
-  66% { transform: translate(-5px, 8px) rotate(-1deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
-
-@keyframes floating2 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(-10px, -8px) rotate(-1deg); }
-  66% { transform: translate(8px, 10px) rotate(1deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-@keyframes floating3 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  40% { transform: translate(8px, 8px) rotate(1deg); }
-  70% { transform: translate(-8px, -8px) rotate(-1deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-.animate-float {
-  will-change: transform;
-}
-
-

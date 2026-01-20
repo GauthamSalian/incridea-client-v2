@@ -47,7 +47,7 @@ function TechCard() {
 
 
                         <div className="flex justify-end gap-2">
-                            <Glass className="rounded-full hover:animate-pulse flex justify-center items-center"><Linkedin  className="w-6"/></Glass>
+                            <Glass className="rounded-full hover:animate-pulse flex justify-center items-center"><Linkedin className="w-6" /></Glass>
                             <Glass className="rounded-full hover:animate-pulse flex justify-center items-center"><Instagram className="w-6" /></Glass>
                             <Glass className="rounded-full hover:animate-pulse flex justify-center items-center"><Github className="w-6" /></Glass>
                         </div>

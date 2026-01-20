@@ -24,7 +24,7 @@ export default function CoreTeamPage() {
       <style>
         {`@import url('https://fonts.googleapis.com/css2?family=Michroma&display=swap');`}
       </style>
-      <div 
+      <div
         className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/temp_event_bg.png')" }}
       >
@@ -33,20 +33,20 @@ export default function CoreTeamPage() {
 
       {/* Content */}
       <section className="flex flex-col items-center w-full py-12 px-4">
-        <Slideshow 
-          images={teamImages} 
+        <Slideshow
+          images={teamImages}
           autoplayDelay={4000}
         />
-        
+
         {/* Animated Title - Fade Up */}
-        <motion.h1 
+        <motion.h1
           className="font-['Michroma'] text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold mt-12 text-white tracking-wider"
           initial={{ opacity: 0, y: 80 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 1, 
+          transition={{
+            duration: 1,
             ease: "easeOut",
-            delay: 0.5 
+            delay: 0.5
           }}
         >
           OUR CORE
@@ -55,11 +55,12 @@ export default function CoreTeamPage() {
         {/* Team Members Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 w-full max-w-6xl">
           {teamMembers.map((member, index) => (
-              <CoreTeamCard
-                imageSrc={member.imageSrc}
-                title={member.title}
-                subtitle={member.subtitle}
-              />
+            <CoreTeamCard
+              key={index}
+              imageSrc={member.imageSrc}
+              title={member.title}
+              subtitle={member.subtitle}
+            />
           ))}
         </div>
       </section>
