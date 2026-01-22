@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
+import { User } from "lucide-react";
 
 interface NavbarProps {
   token: string | null;
@@ -8,11 +9,7 @@ interface NavbarProps {
   isLoading: boolean;
 }
 
-const Navbar = ({
-  token,
-  onLogout,
-  isLoading,
-}: NavbarProps) => {
+const Navbar = ({ token, userName, onLogout, isLoading }: NavbarProps) => {
   return (
     <div className="fixed top-0 left-0 w-full z-50 px-4 md:px-14 py-2 md:py-4 grid grid-cols-3 items-start bg-transparent">
       {/* Logo */}
@@ -48,7 +45,14 @@ const Navbar = ({
       <div className="flex items-center gap-2 md:gap-4 mt-10 lg:mt-8.5 ml-0 md:ml-60 justify-end">
         {token ? (
           <div className="flex items-center gap-2 md:gap-4">
-
+            <a
+              href={`${import.meta.env.VITE_MAIN_URL}/profile`}
+              className="hidden md:flex items-center gap-2 text-white hover:text-purple-300 transition-colors font-['Orbitron'] text-sm  cursor-target"
+              title="Profile"
+            >
+              <User size={18} />
+              <span className="uppercase tracking-wide">{userName}</span>
+            </a>
             <button
               onClick={onLogout}
               className="
