@@ -113,7 +113,7 @@ const people = [
 export default function TechTeamPage() {
    
 
-  const uq=[...new Set(people.map(user => user.role))]
+  // const uq=[...new Set(people.map(user => user.role))]
 
   return (
     <>
@@ -128,10 +128,10 @@ export default function TechTeamPage() {
       </div>
 
       {/* Content */}
-      <section className="flex flex-col items-center w-full py-12 px-4">
+      <section className="flex flex-col items-center w-full pt-0 sm:pt-2 md:pt-4 lg:pt-6 pb-12 px-4">
          
         {/* Members section */}
-        <div className="relative pt-20 mt-10 flex flex-col items-center justify-center w-full">
+        <div className="relative pt-20 flex flex-col items-center justify-center w-full">
         {/* Animated Title - Fade Up */}
           <motion.h1
             className="font-['Michroma'] text-3xl sm:text-5xl sm:top-13 md:top-11 lg:top-4  top-17 text-center md:text-6xl absolute lg:text-8xl font-bold w-full mt-12 bg-gradient-to-b from-white via-white to-transparent bg-clip-text text-transparent tracking-wider"
