@@ -1,7 +1,7 @@
 .card {
   max-width: 100%;
   display: block;
-  padding: 0.75rem;
+  padding: 2rem;
   overflow: hidden;
   /* border-radius: 1rem; */
   transition: opacity 0.26s ease-out;

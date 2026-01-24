@@ -1,4 +1,4 @@
-
+  
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
@@ -7,7 +7,9 @@ import { initiatePayment, verifyPaymentSignature } from '../api/registration'
 import { fetchMe } from '../api/auth'
 import { showToast } from '../utils/toast'
 import PaymentProcessingModal from '../components/PaymentProcessingModal'
-// verifyPayment removed from here, used in Modal now
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
+import regBg from '../assets/reg-bg.jpg'
+
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -73,6 +75,8 @@ function RegisterPage() {
   })
   
   const [registrationOption, setRegistrationOption] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [isPaymentInitiating, setIsPaymentInitiating] = useState(false)
 
   const computedSelection = useMemo(() => {
       if (!user) return 'NMAMIT';
@@ -80,79 +84,49 @@ function RegisterPage() {
       return 'OTHER';
   }, [user]);
 
-  // But wait, Alumni also has collegeId=1 usually? 
-  // In Auth app Step 1: 
-  // if (selection === 'ALUMNI') { setValue('collegeId', 1) }
-  
-  // So we need to distinguish Alumni.
-  // We can use `user.yearOfGraduation` existence? Or check `user.category` if it exists.
-  // Looking at `authController.ts`: `category: user.category`.
-  
-  // Let's rely on user.category if possible.
-  
   const feeOptions = useMemo(() => {
     if (!registrationConfig) return []
     const { fees, isRegistrationOpen, isSpotRegistration } = registrationConfig
     
     if (!isRegistrationOpen) return []
 
-    // Logic from Auth app adapted for User Profile
-    // We need to know if user is Alumni.
-    // Let's assume we can determine it. 
-    // If not, we might need to ask the user to confirm their type? 
-    // But they already registered.
-    
-    // Simplification: Check user props.
-    // If we can't fully determine, we might show a selection? But user data is already fixed.
-    
-    // Strict logic from Auth Page:
-    // Selection 'NMAMIT' -> collegeId 1.
-    // Selection 'ALUMNI' -> collegeId 1.
-    
-    // If collegeId == 1, could be NMAMIT student OR Alumni.
-    // If `user.category` matches 'ALUMNI'? 
-    
-    // Let's proceed with minimal logic and refine if needed.
-    
+    let options = []
+
     if (computedSelection === 'NMAMIT') {
-        // Check for Alumni?
-        // Assuming for now standard NMAMIT logic if we don't have alumni flag.
-        
           if (isSpotRegistration) {
-            return [
+            options = [
               {
                 id: 'internal-onspot',
                 label: 'On spot registration',
                 amount: Number(fees.internalRegistrationOnSpot) || 0,
               },
             ]
+          } else {
+             // Filter out Merch, only keep Pass
+             options = [
+                {
+                  id: 'internal-pass',
+                  label: 'Incridea Pass',
+                  amount: fees.internalRegistrationFeeGen,
+                },
+             ]
           }
-          return [
+    } else {
+      // OTHER
+       if (isSpotRegistration) {
+          options = [
             {
-              id: 'internal-merch',
-              label: 'Merch + Incridea Pass',
-              amount: fees.internalRegistrationFeeInclusiveMerch,
-            },
-            {
-              id: 'internal-pass',
-              label: 'Incridea Pass only',
-              amount: fees.internalRegistrationFeeGen,
+              id: 'external-onspot',
+              label: 'On spot registration',
+              amount: fees.externalRegistrationFeeOnSpot,
             },
           ]
+        } else {
+           options = [{ id: 'external-early', label: 'Early Bird', amount: fees.externalRegistrationFee }]
+        }
     }
     
-    // OTHER
-     if (isSpotRegistration) {
-        return [
-          {
-            id: 'external-onspot',
-            label: 'On spot registration',
-            amount: fees.externalRegistrationFeeOnSpot,
-          },
-        ]
-      }
-      return [{ id: 'external-early', label: 'Early Bird', amount: fees.externalRegistrationFee }]
-
+    return options
   }, [registrationConfig, computedSelection])
 
   useEffect(() => {
@@ -163,9 +137,32 @@ function RegisterPage() {
     }
   }, [feeOptions])
 
+  // Pricing Calculation
+  const selectedFee = useMemo(() => {
+      return feeOptions.find(o => o.id === registrationOption)
+  }, [feeOptions, registrationOption])
+
+  const pricingBreakdown = useMemo(() => {
+      if (!selectedFee) return null
+      const base = Number(selectedFee.amount)
+      // 2.36% tax
+      const taxRate = 0.0236
+      const taxAmount = base * taxRate
+      const total = Math.ceil(base + taxAmount)
+      
+      return {
+          base,
+          tax: taxAmount, 
+          total
+      }
+  }, [selectedFee])
+
+
   const handlePayment = async () => {
-     if (!registrationOption) return
+     if (!registrationOption || !termsAccepted || isPaymentInitiating) return
      
+     setIsPaymentInitiating(true)
+
      const loadScript = (src: string) => {
         return new Promise((resolve) => {
             const script = document.createElement('script')
@@ -180,6 +177,7 @@ function RegisterPage() {
          const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
          if (!res) {
              showToast('Razorpay SDK failed to load', 'error')
+             setIsPaymentInitiating(false)
              return
          }
 
@@ -205,6 +203,7 @@ function RegisterPage() {
                   isOpen: true, 
                   status: 'PENDING',
                 })
+                setIsPaymentInitiating(false)
 
                 try {
                   await verifyPaymentSignature(response)
@@ -220,6 +219,7 @@ function RegisterPage() {
               modal: {
                 ondismiss: async function () {
                    setModalState((prev) => ({ ...prev, isOpen: true, status: 'PENDING', pid: null }))
+                   setIsPaymentInitiating(false)
                    const { data: updatedUser } = await refetchUser()
                     if (updatedUser?.user?.pid) {
                       setModalState({
@@ -241,12 +241,31 @@ function RegisterPage() {
          const paymentObject = new (window as any).Razorpay(options)
          paymentObject.on('payment.failed', function (response: any) {
              showToast(response.error.description || 'Payment Failed', 'error')
+             setIsPaymentInitiating(false)
          })
          paymentObject.open()
-
+         // Note: We don't set isPaymentInitiating(false) here immediately because we want it to stay 'loading'
+         // until the user interacts with the modal (dismiss or success).
+         // However, `open()` is non-blocking usually? No, the modal opens.
+         // Actually, if we want to show "Opening...", maybe we should reset after open?
+         // But the user said "Show Opening payment page when clicked and razorpay page is opened".
+         // The razorpay page IS the modal/iframe.
+         // So keeping it "Opening..." might be confusing if the modal is already there?
+         // User might mean "Show 'Opening...' WHILST it is opening".
+         // Let's keep it disabled but maybe change text back? 
+         // "Disable the complete payment button and show Opening payment page when clicked and razorpay page is opened"
+         // This phrasing suggests: Click -> Button Disabled & Text "Opening..." -> Razorpay Opens.
+         // It doesn't explicitly say "Re-enable". But logically it should be disabled while payment is in progress?
+         // Or strictly "Opening..." is for the loading phase.
+         // Ill keep it simple: Start loading -> Open -> Stop loading (or keep disabled)?
+         // If I stop loading immediately after `open()`, it flashes.
+         // If I wait for dismiss/handler, it stays "Opening..." while user is paying.
+         // That might be better.
+         
      } catch (err: any) {
          console.error(err)
          showToast(err.response?.data?.message || 'Error initiating payment', 'error')
+         setIsPaymentInitiating(false)
      }
   }
 
@@ -258,85 +277,139 @@ function RegisterPage() {
   if (registrationConfig && !registrationConfig.isRegistrationOpen) {
     return (
       <section className="space-y-4 max-w-2xl mx-auto p-4">
-        <div className="card p-6">
+        <LiquidGlassCard className="p-6">
           <p className="muted mb-2">Registration</p>
-          <h1 className="text-2xl font-semibold text-slate-50">Join Incridea</h1>
+          <h1 className="text-2xl font-semibold text-slate-50">Register Incridea</h1>
           <p className="mt-2 text-slate-300">Registrations are not open yet. Please check back soon.</p>
-        </div>
+        </LiquidGlassCard>
       </section>
     )
   }
 
   return (
-    <section className="space-y-6 max-w-2xl mx-auto p-4">
-      <div className="card space-y-4 p-6">
-        <div>
-           <h1 className="text-2xl font-semibold text-slate-50">Make Payment</h1>
-           <p className="text-sm text-slate-400">Select your registration plan.</p>
+    <>
+      <div 
+          className="fixed inset-0 -z-10 h-full w-full bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${regBg})` }}
+      />
+      <section className="relative max-w-6xl mx-auto p-4 md:p-6 lg:p-8">
+        <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-50">Incridea Registration</h1>
+            <p className="text-slate-400 mt-1">Confirm your details and complete payment to join.</p>
         </div>
 
-        {feeOptions.length > 0 ? (
-             <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
-               <div className="flex items-center justify-between">
-                 <p className="text-sm font-semibold text-slate-100">Registration option</p>
-                 <span className="text-xs text-slate-400">
-                     {registrationConfig?.isRegistrationOpen ? 'Registration open' : 'On-spot pricing active'}
-                 </span>
-               </div>
-               <div className="grid gap-3 md:grid-cols-1">
-                 {feeOptions.map((option) => (
-                   <label
-                     key={option.id}
-                     className={`cursor-pointer flex items-center justify-between gap-3 rounded-lg border px-3 py-2 ${
-                       registrationOption === option.id
-                         ? 'border-sky-400 bg-sky-500/10 text-sky-50'
-                         : 'border-slate-800 bg-slate-900/60 text-slate-100'
-                     }`}
-                   >
-                     <div className="space-y-1">
-                       <p className="text-sm font-semibold">{option.label}</p>
-                       <p className="text-xs text-slate-400">₹ {option.amount ?? 0}</p>
-                     </div>
-                     <input
-                       type="radio"
-                       className="h-4 w-4"
-                       checked={registrationOption === option.id}
-                       onChange={() => setRegistrationOption(option.id)}
-                     />
-                   </label>
-                 ))}
-               </div>
-               <p className="text-xs text-slate-400">
-                 Prices are subject to change.
-               </p>
-             </div>
-           ) : (
-              <p className="text-sm text-slate-400">No payment options available for your category.</p>
-           )}
+        <LiquidGlassCard className="p-8 md:p-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+              {/* Left Column: Details & Terms */}
+              <div className="space-y-6 h-fit">
+                  <div>
+                      <h2 className="text-xl font-semibold text-slate-100 mb-4">Your Details</h2>
+                      <div className="space-y-4 text-sm">
+                          <div className="p-3 rounded-lg">
+                              <span className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Name</span>
+                              <div className="text-slate-200 font-medium">{user?.name}</div>
+                          </div>
+                          <div className="p-3 rounded-lg">
+                              <span className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Email</span>
+                              <div className="text-slate-200 font-medium">{user?.email}</div>
+                          </div>
+                          <div className="p-3 rounded-lg">
+                              <span className="block text-xs text-slate-500 uppercase tracking-wider mb-1">Contact</span>
+                              <div className="text-slate-200 font-medium">{user?.phoneNumber || 'N/A'}</div>
+                          </div>
+                      </div>
+                  </div>
 
-           <button 
-             className="button w-full" 
-             onClick={handlePayment}
-             disabled={!registrationOption}
-           >
-             Complete Registration
-           </button>
-      </div>
+                  <div className="pt-4 border-t border-slate-800">
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                          <div className="relative flex items-center mt-0.5">
+                              <input 
+                                  type="checkbox" 
+                                  className="peer h-5 w-5 appearance-none rounded border border-slate-600 checked:border-sky-500 checked:bg-sky-500 transition-colors"
+                                  checked={termsAccepted}
+                                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                              />
+                              <svg className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                          </div>
+                          <div className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                              I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:text-sky-300 hover:underline">Terms and Conditions</a>, <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:text-sky-300 hover:underline">Privacy Policy</a>, and <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:text-sky-300 hover:underline">Refund Policy</a> of Incridea.
+                          </div>
+                      </label>
+                  </div>
+              </div>
 
-      <PaymentProcessingModal 
-        isOpen={modalState.isOpen}
-        onClose={() => {
-            setModalState(prev => ({ ...prev, isOpen: false }))
-            // Optionally refetch user or redirect
-            if (modalState.status === 'SUCCESS' || modalState.pid) {
-                navigate('/')
-            }
-        }}
-        userId={user?.id}
-        completedPid={modalState.pid}
-        failed={modalState.status === 'FAILED'}
-      />
-    </section>
+              {/* Right Column: Pricing */}
+              <div className="space-y-6 flex flex-col h-fit relative lg:pl-12 lg:border-l border-slate-800">
+                  <div>
+                      <h2 className="text-xl font-semibold text-slate-100 ">Payment Summary</h2>                  
+                      {/* Status Message */}
+                      <div className={`py-2 rounded-lg text-xs ${
+                          !registrationConfig?.isSpotRegistration 
+                      }`}>
+                          {!registrationConfig?.isSpotRegistration ? (
+                              <p>Oh nice you are a early bird therefore you have early bird discount, Don't wait until Incridea !</p>
+                          ) : (
+                              <p>You missed the early bird discount. Only On-Spot Registration is available</p>
+                          )}
+                      </div>
+                  </div>
+
+                  {pricingBreakdown ? (
+                      <div className="space-y-4">
+                          <div className="rounded-lg p-4 border border-slate-800 space-y-3">
+                              <div className="flex justify-between items-center text-slate-300">
+                                  <span>{selectedFee?.label}</span>
+                                  <span>₹ {pricingBreakdown.base.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-slate-400 text-sm">
+                                  <span>Tax & Gateway Charges</span>
+                                  <span>₹ {pricingBreakdown.tax.toFixed(2)}</span>
+                              </div>
+                              <div className="h-px bg-slate-700/50 my-2"></div>
+                              <div className="flex justify-between items-center text-slate-100 font-semibold text-lg">
+                                  <span>Total Payable</span>
+                                  <span>₹ {pricingBreakdown.total}</span>
+                              </div>
+                          </div>
+                          
+                          <div className="border border-sky-500/20 p-3 rounded text-xs text-sky-200/80">
+                              Note: The total amount is rounded up to the nearest integer.
+                          </div>
+                      </div>
+                  ) : (
+                      <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-200 rounded">
+                          No valid registration option available.
+                      </div>
+                  )}
+
+                  <button 
+                      className={`button w-full py-4 text-base font-semibold shadow-lg shadow-sky-900/20 ${(!registrationOption || !termsAccepted || isPaymentInitiating) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
+                      onClick={handlePayment}
+                      disabled={!registrationOption || !termsAccepted || isPaymentInitiating}
+                  >
+                      {isPaymentInitiating ? 'Opening payment page...' : (pricingBreakdown ? `Pay ₹ ${pricingBreakdown.total}` : 'Complete Registration')}
+                  </button>
+              </div>
+          </div>
+        </LiquidGlassCard>
+
+        <PaymentProcessingModal 
+          isOpen={modalState.isOpen}
+          onClose={() => {
+              setModalState(prev => ({ ...prev, isOpen: false }))
+              // Optionally refetch user or redirect
+              if (modalState.status === 'SUCCESS' || modalState.pid) {
+                  navigate('/')
+              }
+          }}
+          userId={user?.id}
+          completedPid={modalState.pid}
+          failed={modalState.status === 'FAILED'}
+        />
+      </section>
+    </>
   )
 }
 

@@ -1,79 +1,11 @@
 import { MdCall, MdLocationOn, MdMail } from 'react-icons/md'
 import { FaYoutube, FaInstagram, FaLinkedin } from 'react-icons/fa'
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
 
 function ContactPage() {
   return (
     <>
-      {/* Embedded CSS - No separate file needed! */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          /* Fix horizontal scrollbar */
-          body {
-            overflow-x: hidden;
-          }
-          
-          .card {
-            width: 100%;
-            max-width: 100%;
-            display: block;
-            padding: 0.75rem;
-            overflow: hidden;
-            border-radius: 1rem;
-            transition: opacity 0.26s ease-out;
-            filter: drop-shadow(-0.5rem -0.625rem 2.875rem #0000005f);
-            backdrop-filter: brightness(1.1) blur(0.125rem) url(#displacementFilter);
-            -webkit-backdrop-filter: brightness(1.1) blur(0.125rem) url(#displacementFilter);
-            position: relative;
-            border: 0.0625rem solid rgba(255, 255, 255, 0.18);
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent 60%), rgba(21, 21, 21, 0.50);
-            box-shadow: inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.08), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.22);
-            box-sizing: border-box;
-          }
-          
-          @media (min-width: 640px) {
-            .card {
-              padding: 1.25rem;
-              border-radius: 1.5rem;
-            }
-          }
-          
-          @media (min-width: 1024px) {
-            .card {
-              padding: 2rem;
-              border-radius: 1.75rem;
-            }
-          }
-          
-          .card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            border-radius: inherit;
-            box-shadow: inset 0 0 0 0.0625rem rgba(255, 255, 255, 0.08), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.22);
-            pointer-events: none;
-          }
-          
-          .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04), transparent 60%);
-            pointer-events: none;
-          }
-          
-          .card__content {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 100%;
-            overflow: hidden;
-          }
-        `
-      }} />
+
 
       <div className="min-h-screen text-white relative overflow-x-hidden">
         {/* Full Screen Background Image */}
@@ -112,8 +44,7 @@ function ContactPage() {
             </header>
 
             {/* Main Contact Card */}
-            <section className="card">
-              <div className="card__content">
+            <LiquidGlassCard>
                 <div className="grid gap-6 md:grid-cols-5">
                   {/* Left Side - Contact Information */}
                   <div className="md:col-span-2 space-y-8 p-4 md:p-6 relative">
@@ -245,8 +176,7 @@ function ContactPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
+            </LiquidGlassCard>
           </div>
         </div>
 

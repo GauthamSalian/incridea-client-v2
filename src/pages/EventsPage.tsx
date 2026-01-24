@@ -10,7 +10,7 @@ import {
 } from "../api/public";
 import EventPreviewCard from "../components/events/EventCard";
 
-import Glass from "../components/ui/Glass";
+import LiquidGlassCard from "../components/liquidglass/LiquidGlassCard";
 
 const CATEGORY_FILTERS: (PublicEventCategory | "ALL")[] = [
   "ALL",
@@ -141,7 +141,7 @@ function EventsPage() {
           </p>
         </header>
 
-        <Glass className="rounded-2xl space-y-4 p-6">
+        <LiquidGlassCard className="rounded-2xl space-y-4 p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative w-full lg:max-w-md">
               <AiOutlineSearch
@@ -173,7 +173,7 @@ function EventsPage() {
               </div>
             </div>
           </div>
-        </Glass>
+        </LiquidGlassCard>
 
         <div className="grid gap-x-6 gap-y-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 place-items-center">
           {filteredEvents.map((event, index) => (

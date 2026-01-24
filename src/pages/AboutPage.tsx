@@ -5,11 +5,13 @@ const GALLERY_ITEMS = [
   { id: 'g4', title: 'Campus Life', desc: 'A vibrant campus atmosphere with art, installations, and chill zones.' },
 ]
 
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
+
 function AboutPage() {
   return (
     <div className="min-h-screen px-3 sm:px-4 pb-28 md:pb-16 pt-8 sm:pt-10 text-white md:px-6">
       <div className="mx-auto flex max-w-5xl flex-col gap-8 sm:gap-12">
-        <header className="card isolate grid gap-4 sm:gap-6 p-4 sm:p-6 md:p-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <LiquidGlassCard className="isolate grid gap-4 sm:gap-6 p-4 sm:p-6 md:p-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-3 sm:space-y-4">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Discover</p>
             <h1 className="text-3xl sm:text-4xl font-semibold text-white md:text-5xl">About Incridea</h1>
@@ -47,9 +49,9 @@ function AboutPage() {
               />
             </div>
           </div>
-        </header>
+        </LiquidGlassCard>
 
-        <section className="card isolate grid gap-6 sm:gap-8 p-4 sm:p-6 md:p-10 lg:grid-cols-[1fr_1fr]">
+        <LiquidGlassCard className="isolate grid gap-6 sm:gap-8 p-4 sm:p-6 md:p-10 lg:grid-cols-[1fr_1fr]">
           <div className="flex flex-col gap-4 sm:gap-6">
             <div className="flex items-center gap-3 sm:gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-3 sm:p-4">
               <img
@@ -100,9 +102,9 @@ function AboutPage() {
               ))}
             </div>
           </div>
-        </section>
+        </LiquidGlassCard>
 
-        <section className="card isolate grid gap-4 sm:gap-6 p-4 sm:p-6 md:p-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <LiquidGlassCard className="isolate grid gap-4 sm:gap-6 p-4 sm:p-6 md:p-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-3 sm:space-y-4">
             <p className="muted">Experience</p>
             <h3 className="text-xl sm:text-2xl font-semibold text-white">What to expect</h3>
@@ -144,7 +146,7 @@ function AboutPage() {
               Highlights reel — soak in the vibe before you arrive.
             </div>
           </div>
-        </section>
+        </LiquidGlassCard>
       </div>
     </div>
   )

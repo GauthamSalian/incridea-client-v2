@@ -7,6 +7,7 @@ import { Loader2, Moon, Users, User, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
 
 export default function AccommodationPage() {
   const [activeTab, setActiveTab] = useState(0)
@@ -43,7 +44,7 @@ export default function AccommodationPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Stats / Info Sidebar */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-2xl">
+                    <LiquidGlassCard className="p-6">
                         <h2 className="text-xl font-bold text-white mb-4 flex items-center">
                             <Moon className="w-5 h-5 mr-2 text-yellow-400" /> Availability
                         </h2>
@@ -68,12 +69,12 @@ export default function AccommodationPage() {
                         <div className="mt-6 text-xs text-gray-500">
                             * Accommodation is provided on a first-come, first-served basis.
                         </div>
-                    </div>
+                    </LiquidGlassCard>
                 </div>
 
                 {/* Booking Forms */}
                 <div className="lg:col-span-2">
-                     <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
+                     <LiquidGlassCard>
                         <Tab.Group selectedIndex={activeTab} onChange={setActiveTab}>
                             <Tab.List className="flex border-b border-white/10">
                                 <Tab className={({ selected }) =>
@@ -114,7 +115,7 @@ export default function AccommodationPage() {
                                 </Tab.Panel>
                             </Tab.Panels>
                         </Tab.Group>
-                     </div>
+                     </LiquidGlassCard>
                 </div>
             </div>
         )}

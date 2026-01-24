@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { useSocket } from '../hooks/useSocket'
 import { IoCheckmarkCircle, IoClose, IoWarning } from 'react-icons/io5'
-import { FaFileInvoice, FaIdCard, FaSpinner } from 'react-icons/fa'
+import { FaIdCard, FaSpinner } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { getPaymentStatus } from '../api/registration'
 
@@ -17,13 +17,21 @@ interface PaymentProcessingModalProps {
 
 type StepStatus = 'pending' | 'loading' | 'success' | 'error' | 'skipped'
 
+const glassCardStyle = {
+    borderRadius: "1.75rem",
+    border: "1px solid rgba(255, 255, 255, 0.18)",
+    background: `linear-gradient(to top, rgba(0, 0, 0, 0.20), transparent 60%), rgba(21, 21, 21, 0.30)`,
+    boxShadow: `inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.22)`,
+    backdropFilter: "brightness(1.1) blur(1px)",
+    WebkitBackdropFilter: "brightness(1.1) blur(1px)",
+}
+
 export default function PaymentProcessingModal({ isOpen, onClose, userId, completedPid, failed }: PaymentProcessingModalProps) {
   const { socket } = useSocket()
   const navigate = useNavigate()
   
   const [steps, setSteps] = useState({
     payment: (failed ? 'error' : 'success') as StepStatus, 
-    receipt: (failed ? 'error' : 'pending') as StepStatus,
     pid: (failed ? 'error' : 'pending') as StepStatus,
   })
 
@@ -37,7 +45,7 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
   // Watch for failed prop
   useEffect(() => {
     if (failed) {
-        setSteps(prev => ({ ...prev, payment: 'error', receipt: 'error', pid: 'error' }))
+        setSteps(prev => ({ ...prev, payment: 'error', pid: 'error' }))
     }
   }, [failed])
 
@@ -46,7 +54,6 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
     if (completedPid && steps.pid !== 'success' && !finalPid) {
         setSteps({
             payment: 'success',
-            receipt: 'success', // Assume receipt done if PID exists
             pid: 'success'
         })
         setFinalPid(completedPid)
@@ -59,18 +66,6 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
 
     const room = `user-${userId}`
     socket.emit('join-room', room)
-
-    const handleGeneratingReceipt = () => {
-        setSteps(prev => ({ ...prev, receipt: 'loading' }))
-    }
-
-    const handleReceiptGenerated = () => {
-        setSteps(prev => ({ ...prev, receipt: 'success' }))
-    }
-    
-    const handleReceiptFailed = () => {
-         setSteps(prev => ({ ...prev, receipt: 'skipped' })) // or error
-    }
 
     const handleGeneratingPid = () => {
         setSteps(prev => ({ ...prev, pid: 'loading' }))
@@ -85,12 +80,9 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
     }
 
     const handlePaymentFailed = () => {
-        setSteps(prev => ({ ...prev, payment: 'error', receipt: 'error', pid: 'error' }))
+        setSteps(prev => ({ ...prev, payment: 'error', pid: 'error' }))
     }
 
-    socket.on('generating_receipt', handleGeneratingReceipt)
-    socket.on('receipt_generated', handleReceiptGenerated)
-    socket.on('receipt_failed', handleReceiptFailed)
     socket.on('generating_pid', handleGeneratingPid)
     socket.on('pid_generated', handlePidGenerated)
     socket.on('payment_failed', handlePaymentFailed)
@@ -99,18 +91,12 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
     const checkStatus = async () => {
         try {
             const statusData = await getPaymentStatus()
-            if (statusData.receipt) {
-                setSteps(prev => ({ ...prev, receipt: 'success', payment: 'success' }))
-            }
             if (statusData.pid) {
-                 setSteps(prev => ({ ...prev, pid: 'success', receipt: 'success', payment: 'success' }))
+                 setSteps(prev => ({ ...prev, pid: 'success', payment: 'success' }))
                  setFinalPid(statusData.pid)
                  setShowSlotMachine(true)
             } else if (statusData.processingStep === 'GENERATING_PID') {
-                 setSteps(prev => ({ ...prev, receipt: 'success', pid: 'loading', payment: 'success' }))
-            } else if (statusData.processingStep === 'GENERATING_RECEIPT') {
-                 // Assume this means payment is done
-                 setSteps(prev => ({ ...prev, payment: 'success', receipt: 'loading' }))
+                 setSteps(prev => ({ ...prev, pid: 'loading', payment: 'success' }))
             }
         } catch(e) { console.error(e) }
     }
@@ -118,9 +104,6 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
     checkStatus()
 
     return () => {
-        socket.off('generating_receipt', handleGeneratingReceipt)
-        socket.off('receipt_generated', handleReceiptGenerated)
-        socket.off('receipt_failed', handleReceiptFailed)
         socket.off('generating_pid', handleGeneratingPid)
         socket.off('pid_generated', handlePidGenerated)
         socket.off('payment_failed', handlePaymentFailed)
@@ -167,7 +150,8 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
          initial={{ opacity: 0, scale: 0.95 }}
          animate={{ opacity: 1, scale: 1 }}
          exit={{ opacity: 0, scale: 0.95 }}
-         className="w-full max-w-md rounded-3xl border border-white/20 bg-slate-900/95 backdrop-blur-2xl shadow-2xl p-6 relative overflow-hidden"
+         style={glassCardStyle}
+         className="w-full max-w-2xl p-8 relative overflow-hidden"
        >
          {/* Background Decor */}
          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-sky-500 via-fuchsia-500 to-sky-500 animate-gradient-x" />
@@ -197,17 +181,6 @@ export default function PaymentProcessingModal({ isOpen, onClose, userId, comple
                       {/* Step 2 & 3 Only if payment is not failed */}
                       {steps.payment !== 'error' && (
                         <>
-                          <StepItem 
-                            icon={<FaFileInvoice />} 
-                            label={
-                                steps.receipt === 'loading' ? "Generating Invoice..." : 
-                                steps.receipt === 'success' ? "Invoice Generated" :
-                                steps.receipt === 'skipped' ? "Invoice Generation Skipped" :
-                                "Generate Invoice"
-                            }
-                            status={steps.receipt} 
-                          />
-
                           <StepItem 
                             icon={<FaIdCard />} 
                             label={
@@ -284,7 +257,7 @@ function PIDReveal({ pid, onComplete }: { pid: string, onComplete: () => void })
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
              >
-                <div className="h-20 w-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4 text-emerald-400 text-4xl">
+                <div className="h-16 w-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4 text-emerald-400 text-3xl">
                     <IoCheckmarkCircle />
                 </div>
                 <h2 className="text-3xl font-bold bg-linear-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
@@ -293,12 +266,28 @@ function PIDReveal({ pid, onComplete }: { pid: string, onComplete: () => void })
                 <p className="text-slate-400 mt-2">Here is your Incridea PID</p>
              </motion.div>
 
-             <div className="flex items-center justify-center gap-2 text-4xl font-mono font-bold text-white bg-slate-800/50 p-6 rounded-2xl border border-white/10 shadow-inner">
-                 <span className="text-sky-400">{prefix}</span>
-                 <span className="text-slate-600">-</span>
-                 <div className="flex gap-1">
+             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-2xl font-mono font-bold text-white">
+                 <div className="flex gap-2">
+                    {prefix.split('').map((char, i) => (
+                        <div 
+                           key={`prefix-${i}`} 
+                           style={{ ...glassCardStyle, borderRadius: "0.8rem", width: "3rem", height: "4rem" }}
+                           className="flex items-center justify-center"
+                       >
+                           <span className="text-sky-400">{char}</span>
+                       </div>
+                    ))}
+                 </div>
+                 
+                 <div className="flex gap-2">
                      {digits.map((digit, i) => (
-                         <SlotDigit key={i} digit={digit} delay={i * 0.2} />
+                         <div 
+                            key={i} 
+                            style={{ ...glassCardStyle, borderRadius: "0.8rem", width: "3rem", height: "4rem" }}
+                            className="flex items-center justify-center"
+                        >
+                            <SlotDigit digit={digit} delay={i * 0.2} />
+                         </div>
                      ))}
                  </div>
              </div>

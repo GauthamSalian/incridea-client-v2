@@ -8,6 +8,7 @@ import {
   type ResetPasswordResponse,
 } from '../api/auth'
 import { showToast } from '../utils/toast'
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
 
 function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -42,7 +43,7 @@ function ResetPasswordPage() {
 
   return (
     <section className="space-y-6">
-      <div className="card space-y-4 p-6">
+      <LiquidGlassCard className="space-y-4 p-6">
         <div>
           <p className="muted">Reset password</p>
           <h1 className="text-2xl font-semibold text-slate-50">Choose a new password</h1>
@@ -80,7 +81,7 @@ function ResetPasswordPage() {
             </p>
           )}
         </form>
-      </div>
+      </LiquidGlassCard>
     </section>
   )
 }

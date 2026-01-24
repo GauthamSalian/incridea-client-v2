@@ -1,7 +1,9 @@
+import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
+
 const PrivacyPage = () => {
   return (
     <div className="w-full">
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 py-20 rounded-2xl text-slate-100 shadow-xl ring-1 ring-slate-800 md:p-10">
+      <LiquidGlassCard className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 py-20 text-slate-100 md:p-10">
         <div className="flex flex-col gap-4 text-center p-20">
           <h1 className="text-4xl font-life-craft tracking-wider text-sky-200 md:text-6xl">
             Incridea 2026 Privacy Policy
@@ -192,7 +194,7 @@ const PrivacyPage = () => {
             .
           </p>
         </section>
-      </div>
+      </LiquidGlassCard>
     </div>
   )
 }
