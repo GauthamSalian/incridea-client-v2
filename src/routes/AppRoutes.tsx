@@ -27,16 +27,14 @@ const AuthRedirect = () => {
     return null;
   }
 
-  window.location.href = `${import.meta.env.VITE_AUTH_URL}/?redirect=${
-    window.location.href
-  }`;
+  window.location.href = `${import.meta.env.VITE_AUTH_URL}/?redirect=${window.location.href
+    }`;
   return null;
 };
 
 const ResetRedirect = () => {
-  window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password${
-    window.location.search
-  }`;
+  window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password${window.location.search
+    }`;
   return null;
 };
 

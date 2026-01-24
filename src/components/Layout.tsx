@@ -14,7 +14,7 @@ function Layout() {
 
   // Removed direct localStorage monitoring as we rely on server session
   // But for logout, we should clear it immediately for better UX
-  
+
   const handleLogout = () => {
     // Clear local state immediately
     localStorage.removeItem('token')
@@ -102,12 +102,12 @@ function Layout() {
 
   if (isLoading) {
     return (
-        <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-50">
-            <div className="text-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-purple-500 mx-auto mb-4"></div>
-                <p>Loading...</p>
-            </div>
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-50">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-purple-500 mx-auto mb-4"></div>
+          <p>Loading...</p>
         </div>
+      </div>
     )
   }
 
@@ -146,7 +146,7 @@ function Layout() {
           </Link>
         </div>
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-1 px-4 pb-5 text-[11px] font-semibold tracking-wide text-slate-200">
-          <Link className="inline-flex items-center gap-1 transition-all hover:tracking-wider hover:text-slate-100 cursor-target" to="/team">
+          <Link className="inline-flex items-center gap-1 transition-all hover:tracking-wider hover:text-slate-100 cursor-target" to="/techteam">
             Made with <span className="text-rose-400">❤</span> by Technical Team
           </Link>
           <p className='cursor-target'>© Incridea {new Date().getFullYear()}</p>
