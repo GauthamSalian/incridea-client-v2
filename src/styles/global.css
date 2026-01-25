@@ -2,6 +2,53 @@
 
 @source "./src/**/*.{ts,tsx,html}";
 
+@theme {
+  --font-sans: "mocoSans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-moco: "mocoSans", sans-serif;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-RegularItalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'mocoSans';
+  src: url('../assets/mocoSans-BlackItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+}
+
 @layer base {
   :root {
     color-scheme: dark;

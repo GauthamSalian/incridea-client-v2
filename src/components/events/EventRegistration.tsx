@@ -169,9 +169,12 @@ export default function EventRegistration({
   if (team) {
     const isLeader = team.Leader?.User?.id === user.id;
     return (
+
       <div className="w-full rounded-lg border border-sky-500/30 bg-sky-500/10 p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sky-100">{team.name}</h3>
+          <h3 className="font-semibold text-sky-100">
+            {type.includes("TEAM") ? team.name : `Participant: ${user?.name}`}
+          </h3>
           {team.confirmed ? (
             <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-950/30 px-2 py-1 rounded">
               <IoCheckmarkDoneCircle /> Confirmed
@@ -184,15 +187,21 @@ export default function EventRegistration({
         </div>
 
         <div className="space-y-1">
-          <p className="text-xs text-slate-400 uppercase">Members</p>
-          {team.TeamMembers?.map((member: any) => (
-            <div
-              key={member.id}
-              className="text-sm text-slate-200 flex justify-between"
-            >
-              <span>{member.PID?.User?.name || `User ${member.PID?.User?.email}`}</span>
-            </div>
-          ))}
+          {type.includes("TEAM") && <p className="text-xs text-slate-400 uppercase">Members</p>}
+          {type.includes("TEAM") ? (
+             team.TeamMembers?.map((member: any) => (
+                <div
+                  key={member.id}
+                  className="text-sm text-slate-200 flex justify-between"
+                >
+                  <span>{member.PID?.User?.name || `User ${member.PID?.User?.email}`}</span>
+                </div>
+             ))
+          ) : (
+             <div className="text-sm text-slate-300">
+                 Registration ID: {team.name}
+             </div>
+          )}
         </div>
 
         {(fees === 0 || !team.confirmed) && isLeader && (
@@ -221,7 +230,7 @@ export default function EventRegistration({
             <button
               className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-red-500/10 border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20 transition-colors"
               onClick={() => {
-                if (confirm("Are you sure you want to unregister/delete team?"))
+                if (confirm("Are you sure you want to unregister?"))
                   deleteTeamMutation.mutate(team.id);
               }}
               disabled={deleteTeamMutation.isPending}
