@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import LightRays from "../components/LightRays";
-import { useEffect, useRef, useState } from 'react';
 
 const ComingSoon = () => {
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.2 });
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 }); // Reset to center default
+
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -20,7 +19,8 @@ const ComingSoon = () => {
 
   // Calculate light direction for shadows
   const lightAngleX = (mousePos.x - 0.5) * 100;
-  const lightAngleY = (mousePos.y - 0.2) * 50;
+  const lightAngleY = (mousePos.y - 0.5) * 100;
+
   return (
     <div className="relative flex h-screen w-full overflow-hidden bg-gradient-to-b from-[#1a1026] via-[#0d0716] to-black">
       {/* ================= INLINE FONT (NO OTHER FILES TO TOUCH) ================= */}
@@ -68,6 +68,9 @@ const ComingSoon = () => {
         <div className="flex h-full w-1/2 items-center">
           <div className="flex flex-col items-start pl-24">
             <div className="relative mb-4">
+              <span className="absolute -left-10 -top-3 text-white/60 text-sm">
+                ⌖
+              </span>
               <h1 className="text-white text-[72px] font-semibold tracking-[0.28em] leading-none">
                 PORTAL
               </h1>
@@ -98,20 +101,25 @@ const ComingSoon = () => {
               filter: `brightness(${0.8 + (0.5 - mousePos.y) * 0.3}) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4))`
             }}
           />
-          <img
-            src="/comingsoon/on.png"
-            alt="Character"
-            className="character-glow relative h-[80%] object-contain transition-all duration-100 ease-out z-10"
-            style={{
-              transform: `translate(${(mousePos.x - 0.5) * -30}px, ${(mousePos.y - 0.5) * -30}px)`,
-              filter: `
-                brightness(${1 + (0.5 - mousePos.y) * 0.4})
-                contrast(1.1)
-                drop-shadow(${-lightAngleX * 0.3}px ${-lightAngleY * 0.5}px 40px rgba(199, 125, 255, ${0.6 - mousePos.y * 0.3}))
-                drop-shadow(${-lightAngleX * 0.5}px ${-lightAngleY * 0.8}px 80px rgba(157, 78, 221, ${0.4 - mousePos.y * 0.2}))
-              `
-            }}
-          />
+          <div style={{ pointerEvents: 'none', position: 'relative', zIndex: 10 }}>
+            <img
+              src="/comingsoon/on.png"
+              alt="Character"
+              className="character-glow h-[70vh] object-contain transition-all duration-100 ease-out"
+              style={{
+                transform: `translate(${(mousePos.x - 0.5) * -30}px, ${(mousePos.y - 0.5) * -30}px)`,
+                filter: `
+                  brightness(${1 + (0.5 - mousePos.y) * 0.55})
+                  contrast(1.15)
+                  saturate(1.1)
+                  drop-shadow(${-lightAngleX * 0.4}px ${-lightAngleY * 0.6}px 50px rgba(199, 125, 255, ${0.5 - mousePos.y * 0.25}))
+                  drop-shadow(${-lightAngleX * 0.6}px ${-lightAngleY * 1}px 100px rgba(157, 78, 221, ${0.35 - mousePos.y * 0.18}))
+                  drop-shadow(${-lightAngleX * 0.8}px ${-lightAngleY * 1.2}px 150px rgba(140, 69, 255, ${0.2 - mousePos.y * 0.1}))
+                `,
+                transition: 'filter 0.1s ease-out', // Only transition filter, let transform be handled by class or separate
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
