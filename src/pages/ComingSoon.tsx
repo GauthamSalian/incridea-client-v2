@@ -7,6 +7,8 @@ const ComingSoon = () => {
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
+  const isTouchRef = useRef(false);
+
   useEffect(() => {
     // Check if we need permission (iOS 13+)
     try {
@@ -23,7 +25,12 @@ const ComingSoon = () => {
       setPermissionGranted(true);
     }
 
+    const handleTouchStart = () => {
+      isTouchRef.current = true;
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
+      if (isTouchRef.current) return;
       // Track mouse even if not hovering container, or stick to window
       const x = e.clientX / window.innerWidth;
       const y = e.clientY / window.innerHeight;
@@ -54,12 +61,15 @@ const ComingSoon = () => {
     };
 
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+
     if (permissionGranted) {
       window.addEventListener('deviceorientation', handleOrientation);
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('deviceorientation', handleOrientation);
     };
   }, [permissionGranted]);
