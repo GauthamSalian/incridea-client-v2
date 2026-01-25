@@ -16,6 +16,7 @@ import AccommodationPage from "../pages/AccommodationPage.tsx";
 import TechTeamPage from "../pages/techteam.tsx";
 import CoreTeamPage from "../pages/coreteam.tsx";
 import NotFoundPage from "../pages/NotFoundPage";
+import ComingSoon from "../pages/ComingSoon.tsx";
 
 const AuthRedirect = () => {
   const params = new URLSearchParams(window.location.search);
@@ -27,14 +28,16 @@ const AuthRedirect = () => {
     return null;
   }
 
-  window.location.href = `${import.meta.env.VITE_AUTH_URL}/?redirect=${window.location.href
-    }`;
+  window.location.href = `${import.meta.env.VITE_AUTH_URL}/?redirect=${
+    window.location.href
+  }`;
   return null;
 };
 
 const ResetRedirect = () => {
-  window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password${window.location.search
-    }`;
+  window.location.href = `${import.meta.env.VITE_AUTH_URL}/reset-password${
+    window.location.search
+  }`;
   return null;
 };
 
@@ -59,8 +62,9 @@ function AppRoutes() {
         <Route path="/accommodation" element={<AccommodationPage />} />
         <Route path="/techteam" element={<TechTeamPage />} />
         <Route path="/coreteam" element={<CoreTeamPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="/comingsoon" element={<ComingSoon />} />
     </Routes>
   );
 }
