@@ -35,9 +35,9 @@ export default function EventRegistration({
   const token = localStorage.getItem("token");
   const user = token
     ? {
-        name: localStorage.getItem("userName"),
-        id: Number(localStorage.getItem("userId")),
-      }
+      name: localStorage.getItem("userName"),
+      id: Number(localStorage.getItem("userId")),
+    }
     : null;
   const queryClient = useQueryClient();
 
@@ -117,7 +117,7 @@ export default function EventRegistration({
         to={`/login?redirectUrl=${encodeURIComponent(`/events/${eventId}`)}`}
         className="w-fit lg:w-full"
       >
-        <button className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-600 px-5 py-2 capitalize text-white hover:bg-sky-500 transition-colors duration-300">
+        <button className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-sky-600 px-5 py-2 capitalize text-white hover:bg-sky-500 transition-colors duration-300 cursor-target">
           <CiLogin className="text-xl" />
           Login to Register
         </button>
@@ -135,6 +135,34 @@ export default function EventRegistration({
 
   if (isLoading || (token && isUserLoading)) {
     return <div className="text-center text-slate-400">Loading status...</div>;
+  }
+
+  if (token && !isFestRegistered) {
+    return (
+      <Link to="/register" className="w-full">
+        <button
+          className="group flex w-full shrink-0 items-center justify-center gap-2 rounded-full
+            px-6 py-2.5 capitalize text-white font-semibold
+            bg-teal-600 border border-teal-500
+            backdrop-blur-2xl
+            shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+            hover:bg-teal-500 hover:border-teal-400 hover:shadow-[0_0_20px_rgba(20,184,166,0.25)]
+            transition-all duration-300
+            active:scale-[0.98]
+            relative overflow-hidden cursor-target"
+        >
+          Register to Incridea
+          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
+            <span className="absolute -left-1/2 top-0 h-full w-1/2 rotate-12 bg-linear-to-r from-transparent via-white/40 to-transparent blur-md" />
+          </span>
+        </button>
+      </Link>
+    );
+  }
+
+  // Hide registration for Alumni
+  if (userData?.user?.category === "ALUMNI" || userData?.user?.roles?.includes("ALUMNI")) {
+    return null;
   }
 
   // Already registered/in a team
@@ -171,7 +199,7 @@ export default function EventRegistration({
           <div className="pt-2">
             {!team.confirmed && fees > 0 && (
               <button
-                className="w-full rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 transition-colors"
+                className="w-full rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 transition-colors cursor-target"
                 onClick={() => alert("Payment integration pending")}
               >
                 Pay ₹{fees} to Confirm
@@ -180,7 +208,7 @@ export default function EventRegistration({
 
             {!team.confirmed && fees === 0 && (
               <button
-                className="w-full rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 transition-colors"
+                className="w-full rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-500 transition-colors cursor-target"
                 onClick={() => confirmTeamMutation.mutate(team.id)}
                 disabled={confirmTeamMutation.isPending}
               >
@@ -191,7 +219,7 @@ export default function EventRegistration({
             )}
 
             <button
-              className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-red-500/10 border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20 transition-colors"
+              className="w-full mt-2 flex items-center justify-center gap-2 rounded-lg bg-red-500/10 border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-500/20 transition-colors cursor-target"
               onClick={() => {
                 if (confirm("Are you sure you want to unregister/delete team?"))
                   deleteTeamMutation.mutate(team.id);
@@ -214,7 +242,7 @@ export default function EventRegistration({
         {(fees === 0 || !team.confirmed) && !isLeader && (
           <button
             onClick={() => leaveTeamMutation.mutate(team.id)}
-            className="w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-300 mt-2"
+            className="w-full flex items-center justify-center gap-2 text-xs text-red-400 hover:text-red-300 mt-2 cursor-target"
           >
             <IoExitOutline /> Leave Team
           </button>
@@ -232,6 +260,7 @@ export default function EventRegistration({
                 showToast("Copied Team ID", "success");
               }}
               title="Copy Team ID"
+              className="cursor-target"
             >
               <IoCopyOutline className="hover:text-white" />
             </button>
@@ -244,28 +273,7 @@ export default function EventRegistration({
   // Not registered
   const isSolo = type === "INDIVIDUAL" || type === "INDIVIDUAL_MULTIPLE_ENTRY";
 
-  if (token && !isFestRegistered) {
-    return (
-      <Link to="/register" className="w-full">
-        <button
-          className="group flex w-full shrink-0 items-center justify-center gap-2 rounded-full
-            px-6 py-2.5 capitalize text-white font-semibold
-            bg-teal-600 border border-teal-500
-            backdrop-blur-2xl
-            shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-            hover:bg-teal-500 hover:border-teal-400 hover:shadow-[0_0_20px_rgba(20,184,166,0.25)]
-            transition-all duration-300
-            active:scale-[0.98]
-            relative overflow-hidden"
-        >
-          Register to Incridea
-          <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
-            <span className="absolute -left-1/2 top-0 h-full w-1/2 rotate-12 bg-linear-to-r from-transparent via-white/40 to-transparent blur-md" />
-          </span>
-        </button>
-      </Link>
-    );
-  }
+
 
   if (isSolo) {
     return (
@@ -278,15 +286,15 @@ export default function EventRegistration({
           hover:bg-teal-500 hover:border-teal-400 hover:shadow-[0_0_20px_rgba(20,184,166,0.25)]
           transition-all duration-300
           active:scale-[0.98]
-          relative overflow-hidden"
+          relative overflow-hidden cursor-target"
         onClick={() => registerSoloMutation.mutate(eventId)}
         disabled={registerSoloMutation.isPending}
       >
         {fees > 0
           ? `Pay ₹${fees} & Register`
           : registerSoloMutation.isPending
-          ? "Registering..."
-          : "Register Now"}
+            ? "Registering..."
+            : "Register Now"}
         <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
           <span className="absolute -left-1/2 top-0 h-full w-1/2 rotate-12 bg-linear-to-r from-transparent via-white/40 to-transparent blur-md" />
         </span>
@@ -307,6 +315,7 @@ export default function EventRegistration({
           transition-all duration-300
           active:scale-[0.98]
           overflow-hidden
+          cursor-target
         "
         onClick={() => setShowCreateModal(true)}
       >
@@ -327,6 +336,7 @@ export default function EventRegistration({
           transition-all duration-300
           active:scale-[0.98]
           overflow-hidden
+          cursor-target
         "
         onClick={() => setShowJoinModal(true)}
       >
