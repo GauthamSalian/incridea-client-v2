@@ -1,18 +1,4 @@
-<<<<<<< HEAD
-import { Link } from 'react-router-dom'
-import LiquidGlassCard from '../components/liquidglass/LiquidGlassCard'
 
-function NotFoundPage() {
-  return (
-    <LiquidGlassCard className="space-y-4 p-6 text-center">
-      <h1 className="text-2xl font-semibold text-slate-50">Page not found</h1>
-      <p className="text-slate-300">The page you requested does not exist.</p>
-      <Link className="button mx-auto w-fit" to="/">
-        Go home
-      </Link>
-    </LiquidGlassCard>
-  )
-=======
 import { Link } from "react-router-dom";
 
 function NotFoundPage() {
@@ -102,7 +88,7 @@ function NotFoundPage() {
         }}
       >
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-0 md:gap-12 px-6">
-          <div className="flex-shrink-0 floating-image flex justify-center items-center w-full md:w-auto">
+          <div className="shrink-0 floating-image flex justify-center items-center w-full md:w-auto">
             <img
               /* I have updated this back to your JPEG name. 
                  If this still fails, please rename your file to simply 'img.jpg' 
@@ -140,7 +126,6 @@ function NotFoundPage() {
       </section>
     </>
   );
->>>>>>> dev
 }
 
 export default NotFoundPage;
