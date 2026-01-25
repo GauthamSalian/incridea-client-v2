@@ -1,4 +1,5 @@
 import LightRays from "../components/LightRays";
+import { useEffect, useRef, useState } from 'react';
 
 const ComingSoon = () => {
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.2 });
@@ -74,9 +75,6 @@ const ComingSoon = () => {
         <div className="flex h-full w-1/2 items-center">
           <div className="flex flex-col items-start pl-24">
             <div className="relative mb-4">
-              <span className="absolute -left-10 -top-3 text-white/60 text-sm">
-                ⌖
-              </span>
               <h1 className="text-white text-[72px] font-semibold tracking-[0.28em] leading-none">
                 PORTAL
               </h1>
@@ -97,11 +95,20 @@ const ComingSoon = () => {
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="flex h-full w-1/2 items-center justify-center">
+        <div className="relative flex h-full w-1/2 items-center justify-center">
+          <img
+            src="/comingsoon/path.png"
+            alt="Path"
+            className="absolute bottom-[-2%] left-[100%] w-[250%] -translate-x-1/2 object-contain opacity-80 z-0 pointer-events-none"
+            style={{
+              transform: `translate(calc(-50% + ${(mousePos.x - 0.5) * -30}px), ${(mousePos.y - 0.5) * -30}px)`,
+              filter: `brightness(${0.8 + (0.5 - mousePos.y) * 0.3}) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4))`
+            }}
+          />
           <img
             src="/comingsoon/on.png"
             alt="Character"
-            className="character-glow h-[80%] object-contain transition-all duration-100 ease-out"
+            className="character-glow relative h-[80%] object-contain transition-all duration-100 ease-out z-10"
             style={{
               transform: `translate(${(mousePos.x - 0.5) * -30}px, ${(mousePos.y - 0.5) * -30}px)`,
               filter: `
