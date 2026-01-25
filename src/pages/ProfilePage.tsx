@@ -203,7 +203,7 @@ function ProfilePage() {
                       {/* Buttons */}
                       <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center items-stretch">
                         <button
-                          className="px-6 py-2.5 card card--dark text-white font-medium rounded-3xl transition-all duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-[10rem] sm:max-w-[15rem] hover:opacity-80 active:opacity-60"
+                          className="px-6 py-2.5 card card--dark text-white font-medium rounded-3xl transition-all duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-40 sm:max-w-60 hover:opacity-80 active:opacity-60"
                           type="button"
                           onClick={() => {
                             setShowChangePassword(true);
@@ -212,14 +212,14 @@ function ProfilePage() {
                           Change password
                         </button>
                         <button
-                          className="px-6 py-2.5 card card--dark text-white font-medium rounded-3xl transition-all duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-[10rem] sm:max-w-[15rem] hover:opacity-80 active:opacity-60"
+                          className="px-6 py-2.5 card card--dark text-white font-medium rounded-3xl transition-all duration-200 w-full sm:w-auto sm:flex-1 sm:min-w-40 sm:max-w-60 hover:opacity-80 active:opacity-60"
                           type="button"
                           onClick={() => {
                             void handleLogout();
                           }}
                         >
                           Logout
-                        </LiquidGlassCard>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -378,8 +378,8 @@ function ProfilePage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-1 md:p-1.5 backdrop-blur">
             <LiquidGlassCard
               className="
-                !w-[92%] sm:!w-[70%] md:!w-[45%] lg:!w-[25%]
-                !max-w-[92%] sm:!max-w-[70%] md:!max-w-[45%] lg:!max-w-[25%]
+                w-[92%]! sm:w-[70%]! md:w-[45%]! lg:w-[25%]!
+                max-w-[92%]! sm:max-w-[70%]! md:max-w-[45%]! lg:max-w-[25%]!
                 flex-none space-y-6 px-9 md:px-10 py-7 md:py-8 rounded-3xl
               "
             >
@@ -442,8 +442,8 @@ function ProfilePage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-1 md:p-1.5 backdrop-blur">
             <LiquidGlassCard
               className="
-                !w-[92%] sm:!w-[70%] md:!w-[45%] lg:!w-[25%]
-                !max-w-[92%] sm:!max-w-[70%] md:!max-w-[45%] lg:!max-w-[25%]
+                w-[92%]! sm:w-[70%]! md:w-[45%]! lg:w-[25%]!
+                max-w-[92%]! sm:max-w-[70%]! md:max-w-[45%]! lg:max-w-[25%]!
                 flex-none space-y-8 px-8 md:px-9 py-8 md:py-9 rounded-3xl
               "
             >
@@ -477,7 +477,7 @@ function ProfilePage() {
                   <input
                     id="currentPassword"
                     type="password"
-                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-gradient-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
+                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-linear-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
                     {...form.register("currentPassword", { required: true })}
                     placeholder="Enter your current password"
                   />
@@ -492,7 +492,7 @@ function ProfilePage() {
                   <input
                     id="newPassword"
                     type="password"
-                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-gradient-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
+                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-linear-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
                     {...form.register("newPassword", { required: true })}
                     placeholder="Create a new password"
                   />
@@ -507,7 +507,7 @@ function ProfilePage() {
                   <input
                     id="confirmNewPassword"
                     type="password"
-                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-gradient-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
+                    className="w-full px-5 md:px-6 py-2.5 md:py-3 leading-tight bg-linear-to-b from-slate-600/30 to-slate-700/30 shadow-inner rounded-full text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:from-slate-600/50 focus:to-slate-700/50 transition-all duration-200"
                     {...form.register("confirmNewPassword", {
                       required: true,
                     })}
@@ -516,7 +516,7 @@ function ProfilePage() {
                 </div>
                 <div className="flex items-center justify-center gap-4 pt-3">
                   <button
-                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 active:brightness-95 text-white font-semibold rounded-3xl transition-all duration-200 min-w-[9rem] shadow-lg hover:shadow-amber-500/20"
+                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 active:brightness-95 text-white font-semibold rounded-3xl transition-all duration-200 min-w-36 shadow-lg hover:shadow-amber-500/20"
                     type="submit"
                     disabled={changePasswordMutation.isPending}
                   >
@@ -525,7 +525,7 @@ function ProfilePage() {
                       : "Update password"}
                   </button>
                   <button
-                    className="px-6 py-2.5 bg-slate-600/40 hover:bg-slate-600/60 text-slate-100 font-semibold rounded-3xl transition-all duration-200 min-w-[9rem]"
+                    className="px-6 py-2.5 bg-slate-600/40 hover:bg-slate-600/60 text-slate-100 font-semibold rounded-3xl transition-all duration-200 min-w-36"
                     type="button"
                     onClick={handleCloseModal}
                     disabled={changePasswordMutation.isPending}
