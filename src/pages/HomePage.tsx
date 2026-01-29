@@ -139,6 +139,36 @@ function HomePage() {
     };
   }, [isMobile]);
 
+  useEffect(() => {
+    const handleParallaxMove = (e: PointerEvent | TouchEvent) => {
+      let clientX: number | undefined;
+
+      if ("touches" in e) {
+        clientX = e.touches[0]?.clientX;
+      } else {
+        clientX = e.clientX;
+      }
+
+      if (typeof clientX !== "number") return;
+
+      const x = (clientX / window.innerWidth - 0.5) * 16;
+      document.documentElement.style.setProperty("--parallax-x", `${x}px`);
+    };
+
+    document.documentElement.style.setProperty("--parallax-x", "0px");
+    window.addEventListener("pointermove", handleParallaxMove, {
+      passive: true,
+    });
+    window.addEventListener("touchmove", handleParallaxMove, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("pointermove", handleParallaxMove);
+      window.removeEventListener("touchmove", handleParallaxMove);
+    };
+  }, []);
+
   // Trigger transition animation
   const triggerTransition = () => {
     if (isTransitioning) return;
@@ -325,7 +355,11 @@ function HomePage() {
         className="absolute inset-0 w-full h-full object-cover will-change-transform"
         fetchPriority="high"
         decoding="async"
-        style={{ zIndex: 10 }}
+        style={{
+          zIndex: 10,
+          transform: "translateX(var(--parallax-x))",
+          transition: "transform 0.25s ease-out",
+        }}
         aria-hidden
       />
 
@@ -337,6 +371,8 @@ function HomePage() {
           className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
           decoding="async"
           style={{
+            transform: "translateX(var(--parallax-x))",
+            transition: "transform 0.25s ease-out",
             maskImage:
               !pageReady || !isInside
                 ? "none"
@@ -359,6 +395,8 @@ function HomePage() {
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform pointer-events-none"
           style={{
             backgroundImage: topLayerImage,
+            transform: "translateX(var(--parallax-x))",
+            transition: "transform 0.25s ease-out",
             filter: "url(#biomeDistortion)",
             maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
             WebkitMaskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
@@ -459,7 +497,14 @@ function HomePage() {
              pointer-events-none"
         style={{ zIndex: 50 }}
       >
-        <TotemGlitch src="/landingpage/totem.webp" active={glitchTotem} />
+        <div
+          style={{
+            transform: "translateX(var(--parallax-x))",
+            transition: "transform 0.25s ease-out",
+          }}
+        >
+          <TotemGlitch src="/landingpage/totem.webp" active={glitchTotem} />
+        </div>
       </div>
 
       {/* Transparent Totem Button - positioned over the totem */}
