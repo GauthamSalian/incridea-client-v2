@@ -11,7 +11,6 @@ function HomePage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [maskDataUrl, setMaskDataUrl] = useState("");
 
-  // List of 6 biome images
   const biomeImages = [
     "/landingpage/1.webp",
     "/landingpage/2.webp",
@@ -21,12 +20,10 @@ function HomePage() {
     "/landingpage/6.webp",
   ];
 
-  // Mobile detection flag
   const isMobile =
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
 
-  // Enable hover effects after page initial paint
   useEffect(() => {
     const id = requestAnimationFrame(() => setPageReady(true));
     return () => cancelAnimationFrame(id);
@@ -39,7 +36,6 @@ function HomePage() {
     canvasRef.current = canvas;
   }, []);
 
-  // Background image paths - cycle through biomes
   const bottomLayerImage = `url('${biomeImages[bottomIndex]}')`;
   const topLayerImage = `url('${biomeImages[topIndex]}')`;
 
@@ -109,7 +105,6 @@ function HomePage() {
     return canvas.toDataURL();
   };
 
-  // Handle pointer move for mask position using CSS variables
   useEffect(() => {
     const maskRadius = isMobile ? 150 : 250;
 
@@ -137,6 +132,73 @@ function HomePage() {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
     };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) {
+      const maskRadius = 150;
+      let rafId: number | null = null;
+
+      const updateMaskPosition = (clientX: number, clientY: number) => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        
+        rafId = requestAnimationFrame(() => {
+          document.documentElement.style.setProperty("--mask-x", `${clientX}px`);
+          document.documentElement.style.setProperty("--mask-y", `${clientY}px`);
+          document.documentElement.style.setProperty(
+            "--mask-radius",
+            `${maskRadius}px`,
+          );
+          setIsInside(true);
+          rafId = null;
+        });
+      };
+
+      const handleTouchStart = (e: TouchEvent) => {
+        if (e.touches[0]) {
+          updateMaskPosition(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (e.touches[0]) {
+          updateMaskPosition(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      };
+
+      const handleTouchEnd = () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        setIsInside(false);
+      };
+
+      window.addEventListener("touchstart", handleTouchStart, {
+        passive: true,
+      });
+      window.addEventListener("touchmove", handleTouchMove, {
+        passive: true,
+      });
+      window.addEventListener("touchend", handleTouchEnd, {
+        passive: true,
+      });
+      window.addEventListener("touchcancel", handleTouchEnd, {
+        passive: true,
+      });
+
+      return () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+        window.removeEventListener("touchcancel", handleTouchEnd);
+      };
+    }
   }, [isMobile]);
 
   useEffect(() => {
@@ -169,7 +231,6 @@ function HomePage() {
     };
   }, []);
 
-  // Trigger transition animation
   const triggerTransition = () => {
     if (isTransitioning) return;
 
@@ -220,36 +281,20 @@ function HomePage() {
     requestAnimationFrame(animate);
   };
 
-  // Cycle through biomes every 10 seconds
-  //  useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setGlitchTotem(true);
-
-  //     // stop glitch after slices finish
-  //     setTimeout(() => {
-  //       setGlitchTotem(false);
-  //     }, 450);
-  //   }, 10000); // every 10s
-
-  //   return () => clearInterval(interval);
-  // }, []);
   useEffect(() => {
     const interval = setInterval(() => {
       if (isTransitioning) return;
 
-      // 1️⃣ Start glitch
       setGlitchTotem(true);
 
-      // 2️⃣ Let glitch play first
       setTimeout(() => {
         triggerTransition();
 
-        // 3️⃣ Stop glitch shortly after transition starts
         setTimeout(() => {
           setGlitchTotem(false);
         }, 450);
-      }, 350); // glitch lead-in time
-    }, 8000); // every 8 seconds
+      }, 350);
+    }, 8000);
 
     return () => clearInterval(interval);
   }, [isTransitioning, bottomIndex]);
@@ -270,7 +315,6 @@ function HomePage() {
 
   return (
     <main className="fixed inset-0 w-full h-full overflow-hidden">
-      {/* SVG Filter for GPU-accelerated biome distortion */}
       <svg className="absolute inset-0 w-0 h-0 pointer-events-none">
         <defs>
           <filter id="biomeDistortion">
@@ -310,8 +354,8 @@ function HomePage() {
         {`
         .bg-corner-slice {
   position: absolute;
-  width: 60%;           /* 👈 not full width anymore */
-  height: 40%;          /* 👈 feels corner-localized */
+  width: 60%;
+  height: 40%;
   background-size: cover;
   background-position: center;
 
@@ -348,7 +392,6 @@ function HomePage() {
 
   `}
       </style>
-      {/* Bottom Layer - Current Background */}
       <img
         src={biomeImages[bottomIndex]}
         alt="Background"
@@ -363,7 +406,6 @@ function HomePage() {
         aria-hidden
       />
 
-      {/* Top Layer - Next Background with Radial Mask */}
       {!isTransitioning && (
         <img
           src={biomeImages[topIndex]}
@@ -410,7 +452,6 @@ function HomePage() {
         />
       )}
 
-      {/* Spotlight glow effect overlay */}
       {isInside && (
         <div
           className="pointer-events-none fixed"
@@ -428,14 +469,11 @@ function HomePage() {
         />
       )}
 
-      {/* One-time horizontal background tear */}
-      {/* Corner background slice glitches (sync with totem) */}
       {glitchTotem && (
         <div
           className="pointer-events-none fixed inset-0"
           style={{ zIndex: 28 }}
         >
-          {/* Top-left */}
           <div
             className="bg-corner-slice"
             style={{
@@ -448,7 +486,6 @@ function HomePage() {
             }}
           />
 
-          {/* Top-right */}
           <div
             className="bg-corner-slice"
             style={{
@@ -461,7 +498,6 @@ function HomePage() {
             }}
           />
 
-          {/* Bottom-left */}
           <div
             className="bg-corner-slice"
             style={{
@@ -474,7 +510,6 @@ function HomePage() {
             }}
           />
 
-          {/* Bottom-right */}
           <div
             className="bg-corner-slice"
             style={{
@@ -489,8 +524,6 @@ function HomePage() {
         </div>
       )}
 
-      {/* Totem Image - centered and visible across all realms */}
-      {/* Totem Image */}
       <div
         className="absolute left-1/2 top-1/2 
              -translate-x-1/2 -translate-y-1/2 
@@ -507,7 +540,6 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Transparent Totem Button - positioned over the totem */}
       <button
         onClick={handleTotemClick}
         className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-80 bg-transparent cursor-pointer hover:bg-white/5 transition-colors duration-300 rounded-lg"
