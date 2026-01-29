@@ -22,6 +22,11 @@ function HomePage() {
     "/landingpage/6.webp",
   ];
 
+  // Mobile detection flag
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px)").matches;
+
   // Background image paths - cycle through biomes
   const bottomLayerImage = `url('${biomeImages[bottomIndex]}')`;
   const topLayerImage = `url('${biomeImages[topIndex]}')`;
@@ -147,54 +152,67 @@ function HomePage() {
     setIsTransitioning(true);
     setGlitchTotem(true);
 
-    // Generate initial full mask to prevent flash
-    const initialMask = generateDistortedMask(100, 0);
-    setMaskDataUrl(initialMask);
+    if (isMobile) {
+      // Mobile: lightweight transition - instant swap with glitch effect
+      const nextImageIndex = (bottomIndex + 1) % 6;
+      setTopIndex(bottomIndex);
+      setBottomIndex(nextImageIndex);
 
-    // Animate mask expansion
-    const duration = 800; // 800ms
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Ease-in-out cubic function
-      const easeInOutCubic =
-        progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-      // Calculate radius (0 to 100%)
-      const radius = easeInOutCubic * 100;
-
-      // Generate distorted mask with animated noise
-      const maskUrl = generateDistortedMask(radius, elapsed / 100);
-      setMaskDataUrl(maskUrl);
-
-      // Push frame into trail
-      setMaskTrail((prev) => {
-        const next = [maskUrl, ...prev];
-        return next.slice(0, 6); // trail length
-      });
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // After animation: what's on bottom moves to top, next image goes to bottom
-        const nextImageIndex = (bottomIndex + 1) % 6;
-        setTopIndex(bottomIndex);
-        setBottomIndex(nextImageIndex);
+      setTimeout(() => {
         setIsTransitioning(false);
-        setMaskDataUrl("");
-        setMaskTrail([]);
-        setTimeout(() => {
-          setGlitchTotem(false);
-        }, 150);
-      }
-    };
+        setGlitchTotem(false);
+      }, 450);
+    } else {
+      // Desktop: full canvas-based mask animation
+      // Generate initial full mask to prevent flash
+      const initialMask = generateDistortedMask(100, 0);
+      setMaskDataUrl(initialMask);
 
-    requestAnimationFrame(animate);
+      // Animate mask expansion
+      const duration = 800; // 800ms
+      const startTime = performance.now();
+
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease-in-out cubic function
+        const easeInOutCubic =
+          progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+        // Calculate radius (0 to 100%)
+        const radius = easeInOutCubic * 100;
+
+        // Generate distorted mask with animated noise
+        const maskUrl = generateDistortedMask(radius, elapsed / 100);
+        setMaskDataUrl(maskUrl);
+
+        // Push frame into trail
+        setMaskTrail((prev) => {
+          const next = [maskUrl, ...prev];
+          return next.slice(0, 6); // trail length
+        });
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // After animation: what's on bottom moves to top, next image goes to bottom
+          const nextImageIndex = (bottomIndex + 1) % 6;
+          setTopIndex(bottomIndex);
+          setBottomIndex(nextImageIndex);
+          setIsTransitioning(false);
+          setMaskDataUrl("");
+          setMaskTrail([]);
+          setTimeout(() => {
+            setGlitchTotem(false);
+          }, 150);
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
   };
 
   // Cycle through biomes every 10 seconds
@@ -290,12 +308,13 @@ function HomePage() {
   `}
       </style>
       {/* Bottom Layer - Current Background */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform"
-        style={{
-          backgroundImage: bottomLayerImage,
-          zIndex: 10,
-        }}
+      <img
+        src={biomeImages[bottomIndex]}
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover will-change-transform"
+        fetchPriority="high"
+        decoding="async"
+        style={{ zIndex: 10 }}
         aria-hidden
       />
 
@@ -318,28 +337,44 @@ function HomePage() {
         ))}
 
       {/* Top Layer - Next Background with Distorted Radial Mask */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform"
-        style={{
-          backgroundImage: topLayerImage,
-          maskImage: isTransitioning
-            ? `url('${maskDataUrl}')`
-            : !isInside
+      {!isTransitioning && (
+        <img
+          src={biomeImages[topIndex]}
+          alt="Next Background"
+          className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
+          decoding="async"
+          style={{
+            maskImage: !isInside
               ? "radial-gradient(circle 0px at 0px 0px, transparent 0%, transparent 100%)"
               : `radial-gradient(circle 250px at ${mousePosition.x}px ${mousePosition.y}px, transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)`,
-          WebkitMaskImage: isTransitioning
-            ? `url('${maskDataUrl}')`
-            : !isInside
+            WebkitMaskImage: !isInside
               ? "radial-gradient(circle 0px at 0px 0px, transparent 0%, transparent 100%)"
               : `radial-gradient(circle 250px at ${mousePosition.x}px ${mousePosition.y}px, transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)`,
-          maskSize: "cover",
-          WebkitMaskSize: "cover",
-          maskPosition: "center",
-          WebkitMaskPosition: "center",
-          zIndex: 20,
-        }}
-        aria-hidden
-      />
+            maskSize: "cover",
+            WebkitMaskSize: "cover",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+            zIndex: 20,
+          }}
+          aria-hidden
+        />
+      )}
+      {isTransitioning && (
+        <div
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform pointer-events-none"
+          style={{
+            backgroundImage: topLayerImage,
+            maskImage: `url('${maskDataUrl}')`,
+            WebkitMaskImage: `url('${maskDataUrl}')`,
+            maskSize: "cover",
+            WebkitMaskSize: "cover",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
+            zIndex: 20,
+          }}
+          aria-hidden
+        />
+      )}
 
       {/* Spotlight glow effect overlay */}
       {isInside && (
