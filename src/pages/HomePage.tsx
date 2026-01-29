@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import TotemGlitch from "../components/effects/TotemGlitch";
 
-
 function HomePage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isInside, setIsInside] = useState(false);
@@ -11,7 +10,6 @@ function HomePage() {
   const [maskDataUrl, setMaskDataUrl] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [glitchTotem, setGlitchTotem] = useState(false);
-
 
   // List of 6 biome images
   const biomeImages = [
@@ -148,7 +146,6 @@ function HomePage() {
     setIsTransitioning(true);
     setGlitchTotem(true);
 
-
     // Generate initial full mask to prevent flash
     const initialMask = generateDistortedMask(100, 0);
     setMaskDataUrl(initialMask);
@@ -184,8 +181,8 @@ function HomePage() {
         setIsTransitioning(false);
         setMaskDataUrl("");
         setTimeout(() => {
-    setGlitchTotem(false);
-  }, 150);
+          setGlitchTotem(false);
+        }, 150);
       }
     };
 
@@ -193,39 +190,38 @@ function HomePage() {
   };
 
   // Cycle through biomes every 10 seconds
-//  useEffect(() => {
-//   const interval = setInterval(() => {
-//     setGlitchTotem(true);
+  //  useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setGlitchTotem(true);
 
-//     // stop glitch after slices finish
-//     setTimeout(() => {
-//       setGlitchTotem(false);
-//     }, 450);
-//   }, 10000); // every 10s
+  //     // stop glitch after slices finish
+  //     setTimeout(() => {
+  //       setGlitchTotem(false);
+  //     }, 450);
+  //   }, 10000); // every 10s
 
-//   return () => clearInterval(interval);
-// }, []);
-useEffect(() => {
-  const interval = setInterval(() => {
-    if (isTransitioning) return;
+  //   return () => clearInterval(interval);
+  // }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isTransitioning) return;
 
-    // 1️⃣ Start glitch
-    setGlitchTotem(true);
+      // 1️⃣ Start glitch
+      setGlitchTotem(true);
 
-    // 2️⃣ Let glitch play first
-    setTimeout(() => {
-      triggerTransition();
-
-      // 3️⃣ Stop glitch shortly after transition starts
+      // 2️⃣ Let glitch play first
       setTimeout(() => {
-        setGlitchTotem(false);
-      }, 450);
-    }, 350); // glitch lead-in time
-  }, 5000); // every 5 seconds
+        triggerTransition();
 
-  return () => clearInterval(interval);
-}, [isTransitioning, bottomIndex]);
+        // 3️⃣ Stop glitch shortly after transition starts
+        setTimeout(() => {
+          setGlitchTotem(false);
+        }, 450);
+      }, 350); // glitch lead-in time
+    }, 5000); // every 5 seconds
 
+    return () => clearInterval(interval);
+  }, [isTransitioning, bottomIndex]);
 
   const handleTotemClick = () => {
     triggerTransition();
@@ -242,9 +238,9 @@ useEffect(() => {
 `;
 
   return (
-    
     <main className="fixed inset-0 w-full h-full overflow-hidden">
-      <style>{`
+      <style>
+        {`
         .bg-corner-slice {
   position: absolute;
   width: 60%;           /* 👈 not full width anymore */
@@ -296,7 +292,7 @@ useEffect(() => {
       />
 
       {/* Top Layer - Next Background with Distorted Radial Mask */}
-      {/* <div
+      <div
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform"
         style={{
           backgroundImage: topLayerImage,
@@ -317,7 +313,7 @@ useEffect(() => {
           zIndex: 20,
         }}
         aria-hidden
-      /> */}
+      />
 
       {/* Spotlight glow effect overlay */}
       {isInside && (
@@ -338,78 +334,76 @@ useEffect(() => {
       )}
 
       {/* One-time horizontal background tear */}
-{/* Corner background slice glitches (sync with totem) */}
-{glitchTotem && (
-  <div className="pointer-events-none fixed inset-0" style={{ zIndex: 28 }}>
-    {/* Top-left */}
-    <div
-      className="bg-corner-slice"
-      style={{
-        top: "0",
-        left: "0",
-        backgroundImage: bottomLayerImage,
-        WebkitMaskImage: softHorizontalMask,
-        maskImage: softHorizontalMask,
-        animationDelay: "0ms",
-      }}
-    />
+      {/* Corner background slice glitches (sync with totem) */}
+      {glitchTotem && (
+        <div
+          className="pointer-events-none fixed inset-0"
+          style={{ zIndex: 28 }}
+        >
+          {/* Top-left */}
+          <div
+            className="bg-corner-slice"
+            style={{
+              top: "0",
+              left: "0",
+              backgroundImage: bottomLayerImage,
+              WebkitMaskImage: softHorizontalMask,
+              maskImage: softHorizontalMask,
+              animationDelay: "0ms",
+            }}
+          />
 
-    {/* Top-right */}
-    <div
-      className="bg-corner-slice"
-      style={{
-        top: "0",
-        right: "0",
-        backgroundImage: bottomLayerImage,
-        WebkitMaskImage: softHorizontalMask,
-        maskImage: softHorizontalMask,
-        animationDelay: "25ms",
-      }}
-    />
+          {/* Top-right */}
+          <div
+            className="bg-corner-slice"
+            style={{
+              top: "0",
+              right: "0",
+              backgroundImage: bottomLayerImage,
+              WebkitMaskImage: softHorizontalMask,
+              maskImage: softHorizontalMask,
+              animationDelay: "25ms",
+            }}
+          />
 
-    {/* Bottom-left */}
-    <div
-      className="bg-corner-slice"
-      style={{
-        bottom: "0",
-        left: "0",
-        backgroundImage: bottomLayerImage,
-        WebkitMaskImage: softHorizontalMask,
-        maskImage: softHorizontalMask,
-        animationDelay: "40ms",
-      }}
-    />
+          {/* Bottom-left */}
+          <div
+            className="bg-corner-slice"
+            style={{
+              bottom: "0",
+              left: "0",
+              backgroundImage: bottomLayerImage,
+              WebkitMaskImage: softHorizontalMask,
+              maskImage: softHorizontalMask,
+              animationDelay: "40ms",
+            }}
+          />
 
-    {/* Bottom-right */}
-    <div
-      className="bg-corner-slice"
-      style={{
-        bottom: "0",
-        right: "0",
-        backgroundImage: bottomLayerImage,
-        WebkitMaskImage: softHorizontalMask,
-        maskImage: softHorizontalMask,
-        animationDelay: "55ms",
-      }}
-    />
-  </div>
-)}
+          {/* Bottom-right */}
+          <div
+            className="bg-corner-slice"
+            style={{
+              bottom: "0",
+              right: "0",
+              backgroundImage: bottomLayerImage,
+              WebkitMaskImage: softHorizontalMask,
+              maskImage: softHorizontalMask,
+              animationDelay: "55ms",
+            }}
+          />
+        </div>
+      )}
 
       {/* Totem Image - centered and visible across all realms */}
-     {/* Totem Image */}
-<div
-  className="absolute left-1/2 top-1/2 
+      {/* Totem Image */}
+      <div
+        className="absolute left-1/2 top-1/2 
              -translate-x-1/2 -translate-y-1/2 
              pointer-events-none"
-  style={{ zIndex: 50 }}
->
-  <TotemGlitch
-  src="/landingpage/totem.png"
-  active={glitchTotem}
-/>
-
-</div>
-
+        style={{ zIndex: 50 }}
+      >
+        <TotemGlitch src="/landingpage/totem.png" active={glitchTotem} />
+      </div>
 
       {/* Transparent Totem Button - positioned over the totem */}
       <button
