@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import TotemGlitch from "../components/effects/TotemGlitch";
 
 function HomePage() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isInside, setIsInside] = useState(false);
   const [topIndex, setTopIndex] = useState(0);
   const [bottomIndex, setBottomIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [maskDataUrl, setMaskDataUrl] = useState("");
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [glitchTotem, setGlitchTotem] = useState(false);
-  const [maskTrail, setMaskTrail] = useState<string[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
   // List of 6 biome images
   const biomeImages = [
@@ -27,123 +24,45 @@ function HomePage() {
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
 
+  // Enable hover effects after page initial paint
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setPageReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   // Background image paths - cycle through biomes
   const bottomLayerImage = `url('${biomeImages[bottomIndex]}')`;
   const topLayerImage = `url('${biomeImages[topIndex]}')`;
 
-  // Create canvas for mask generation
+  // Handle pointer move for mask position using CSS variables
   useEffect(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 800;
-    canvasRef.current = canvas;
-  }, []);
+    const maskRadius = isMobile ? 150 : 250;
 
-  // Simple noise function (pseudo-random)
-  const noise = (x: number, y: number, seed: number) => {
-    const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
-    return n - Math.floor(n);
-  };
-
-  // Generate distorted mask with wavy edges
-  const generateDistortedMask = (radius: number, time: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return "";
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return "";
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-
-    // Create image data for pixel manipulation
-    const imageData = ctx.createImageData(width, height);
-    const data = imageData.data;
-
-    // Parameters for distortion
-    const noiseScale = 0.02;
-    const distortionAmount = 30;
-    const waveFrequency = 8;
-
-    // Invert radius - start large (100) and shrink to 0
-    const invertedRadius = 100 - radius;
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const dx = x - centerX;
-        const dy = y - centerY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx);
-
-        // Generate wavy distortion at the edges
-        const noiseValue1 = noise(x * noiseScale, y * noiseScale, time * 0.5);
-        const noiseValue2 = noise(
-          x * noiseScale + 100,
-          y * noiseScale + 100,
-          time * 0.7,
-        );
-        const wave =
-          Math.sin(angle * waveFrequency + time * 2) * distortionAmount;
-        const distortion = (noiseValue1 - 0.5) * distortionAmount + wave;
-
-        // Calculate distorted radius (shrinking from edge inward)
-        const distortedRadius = (invertedRadius / 100) * (width * 0.7);
-        const edgeWidth = 40;
-        const distortedDist = dist + distortion * noiseValue2;
-
-        // Calculate alpha - opaque inside (showing top layer), transparent outside
-        let alpha = 0;
-        if (distortedDist < distortedRadius - edgeWidth) {
-          alpha = 255; // Fully opaque inside (top layer visible)
-        } else if (distortedDist < distortedRadius + edgeWidth) {
-          // Smooth edge with noise
-          const edgeProgress =
-            (distortedDist - (distortedRadius - edgeWidth)) / (edgeWidth * 2);
-          const edgeNoise = noise(
-            x * noiseScale * 2,
-            y * noiseScale * 2,
-            time + 50,
-          );
-          alpha = Math.floor(
-            (1 - edgeProgress + (edgeNoise - 0.5) * 0.5) * 255,
-          );
-          alpha = Math.max(0, Math.min(255, alpha));
-        }
-
-        const index = (y * width + x) * 4;
-        data[index] = 0; // R
-        data[index + 1] = 0; // G
-        data[index + 2] = 0; // B
-        data[index + 3] = alpha; // Alpha
-      }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-    return canvas.toDataURL();
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    const handlePointerMove = (e: PointerEvent) => {
+      document.documentElement.style.setProperty("--mask-x", `${e.clientX}px`);
+      document.documentElement.style.setProperty("--mask-y", `${e.clientY}px`);
+      document.documentElement.style.setProperty(
+        "--mask-radius",
+        `${maskRadius}px`,
+      );
       setIsInside(true);
     };
 
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       setIsInside(false);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
+    window.addEventListener("pointerleave", handlePointerLeave, {
+      passive: true,
+    });
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
     };
-  }, []);
+  }, [isMobile]);
 
   // Trigger transition animation
   const triggerTransition = () => {
@@ -152,67 +71,18 @@ function HomePage() {
     setIsTransitioning(true);
     setGlitchTotem(true);
 
-    if (isMobile) {
-      // Mobile: lightweight transition - instant swap with glitch effect
+    const transitionDuration = isMobile ? 450 : 800;
+
+    setTimeout(() => {
       const nextImageIndex = (bottomIndex + 1) % 6;
       setTopIndex(bottomIndex);
       setBottomIndex(nextImageIndex);
+      setIsTransitioning(false);
 
       setTimeout(() => {
-        setIsTransitioning(false);
         setGlitchTotem(false);
-      }, 450);
-    } else {
-      // Desktop: full canvas-based mask animation
-      // Generate initial full mask to prevent flash
-      const initialMask = generateDistortedMask(100, 0);
-      setMaskDataUrl(initialMask);
-
-      // Animate mask expansion
-      const duration = 800; // 800ms
-      const startTime = performance.now();
-
-      const animate = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Ease-in-out cubic function
-        const easeInOutCubic =
-          progress < 0.5
-            ? 4 * progress * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-        // Calculate radius (0 to 100%)
-        const radius = easeInOutCubic * 100;
-
-        // Generate distorted mask with animated noise
-        const maskUrl = generateDistortedMask(radius, elapsed / 100);
-        setMaskDataUrl(maskUrl);
-
-        // Push frame into trail
-        setMaskTrail((prev) => {
-          const next = [maskUrl, ...prev];
-          return next.slice(0, 6); // trail length
-        });
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          // After animation: what's on bottom moves to top, next image goes to bottom
-          const nextImageIndex = (bottomIndex + 1) % 6;
-          setTopIndex(bottomIndex);
-          setBottomIndex(nextImageIndex);
-          setIsTransitioning(false);
-          setMaskDataUrl("");
-          setMaskTrail([]);
-          setTimeout(() => {
-            setGlitchTotem(false);
-          }, 150);
-        }
-      };
-
-      requestAnimationFrame(animate);
-    }
+      }, 150);
+    }, transitionDuration);
   };
 
   // Cycle through biomes every 10 seconds
@@ -265,6 +135,42 @@ function HomePage() {
 
   return (
     <main className="fixed inset-0 w-full h-full overflow-hidden">
+      {/* SVG Filter for GPU-accelerated biome distortion */}
+      <svg className="absolute inset-0 w-0 h-0 pointer-events-none">
+        <defs>
+          <filter id="biomeDistortion">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.02"
+              numOctaves="4"
+              result="noise"
+            >
+              <animate
+                attributeName="baseFrequency"
+                values="0.02;0.03;0.02"
+                dur="0.8s"
+                repeatCount="1"
+              />
+            </feTurbulence>
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="40"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="displaced"
+            >
+              <animate
+                attributeName="scale"
+                values="40;60;40"
+                dur="0.8s"
+                repeatCount="1"
+              />
+            </feDisplacementMap>
+          </filter>
+        </defs>
+      </svg>
+
       <style>
         {`
         .bg-corner-slice {
@@ -318,25 +224,7 @@ function HomePage() {
         aria-hidden
       />
 
-      {/* Mask Trail Layers */}
-      {isTransitioning &&
-        maskTrail.map((mask, i) => (
-          <div
-            key={i}
-            className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none"
-            style={{
-              backgroundImage: bottomLayerImage,
-              WebkitMaskImage: `url('${mask}')`,
-              maskImage: `url('${mask}')`,
-              opacity: 0.25 - i * 0.04,
-              transform: `scale(${1 + i * 0.015})`,
-              filter: `blur(${i * 1.2}px)`,
-              zIndex: 15 - i,
-            }}
-          />
-        ))}
-
-      {/* Top Layer - Next Background with Distorted Radial Mask */}
+      {/* Top Layer - Next Background with Radial Mask */}
       {!isTransitioning && (
         <img
           src={biomeImages[topIndex]}
@@ -344,12 +232,14 @@ function HomePage() {
           className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
           decoding="async"
           style={{
-            maskImage: !isInside
-              ? "radial-gradient(circle 0px at 0px 0px, transparent 0%, transparent 100%)"
-              : `radial-gradient(circle 250px at ${mousePosition.x}px ${mousePosition.y}px, transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)`,
-            WebkitMaskImage: !isInside
-              ? "radial-gradient(circle 0px at 0px 0px, transparent 0%, transparent 100%)"
-              : `radial-gradient(circle 250px at ${mousePosition.x}px ${mousePosition.y}px, transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)`,
+            maskImage:
+              !pageReady || !isInside
+                ? "none"
+                : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
+            WebkitMaskImage:
+              !pageReady || !isInside
+                ? "none"
+                : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
             maskSize: "cover",
             WebkitMaskSize: "cover",
             maskPosition: "center",
@@ -364,12 +254,7 @@ function HomePage() {
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform pointer-events-none"
           style={{
             backgroundImage: topLayerImage,
-            maskImage: `url('${maskDataUrl}')`,
-            WebkitMaskImage: `url('${maskDataUrl}')`,
-            maskSize: "cover",
-            WebkitMaskSize: "cover",
-            maskPosition: "center",
-            WebkitMaskPosition: "center",
+            filter: "url(#biomeDistortion)",
             zIndex: 20,
           }}
           aria-hidden
@@ -381,8 +266,8 @@ function HomePage() {
         <div
           className="pointer-events-none fixed"
           style={{
-            left: `${mousePosition.x}px`,
-            top: `${mousePosition.y}px`,
+            left: "var(--mask-x)",
+            top: "var(--mask-y)",
             width: "300px",
             height: "300px",
             transform: "translate(-50%, -50%)",
