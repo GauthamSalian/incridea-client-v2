@@ -10,15 +10,16 @@ function HomePage() {
   const [maskDataUrl, setMaskDataUrl] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [glitchTotem, setGlitchTotem] = useState(false);
+  const [maskTrail, setMaskTrail] = useState<string[]>([]);
 
   // List of 6 biome images
   const biomeImages = [
-    "/landingpage/1.png",
-    "/landingpage/2.png",
-    "/landingpage/3.png",
-    "/landingpage/4.png",
-    "/landingpage/5.png",
-    "/landingpage/6.png",
+    "/landingpage/1.webp",
+    "/landingpage/2.webp",
+    "/landingpage/3.webp",
+    "/landingpage/4.webp",
+    "/landingpage/5.webp",
+    "/landingpage/6.webp",
   ];
 
   // Background image paths - cycle through biomes
@@ -171,6 +172,12 @@ function HomePage() {
       const maskUrl = generateDistortedMask(radius, elapsed / 100);
       setMaskDataUrl(maskUrl);
 
+      // Push frame into trail
+      setMaskTrail((prev) => {
+        const next = [maskUrl, ...prev];
+        return next.slice(0, 6); // trail length
+      });
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
@@ -180,6 +187,7 @@ function HomePage() {
         setBottomIndex(nextImageIndex);
         setIsTransitioning(false);
         setMaskDataUrl("");
+        setMaskTrail([]);
         setTimeout(() => {
           setGlitchTotem(false);
         }, 150);
@@ -290,6 +298,24 @@ function HomePage() {
         }}
         aria-hidden
       />
+
+      {/* Mask Trail Layers */}
+      {isTransitioning &&
+        maskTrail.map((mask, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none"
+            style={{
+              backgroundImage: bottomLayerImage,
+              WebkitMaskImage: `url('${mask}')`,
+              maskImage: `url('${mask}')`,
+              opacity: 0.25 - i * 0.04,
+              transform: `scale(${1 + i * 0.015})`,
+              filter: `blur(${i * 1.2}px)`,
+              zIndex: 15 - i,
+            }}
+          />
+        ))}
 
       {/* Top Layer - Next Background with Distorted Radial Mask */}
       <div
@@ -402,7 +428,7 @@ function HomePage() {
              pointer-events-none"
         style={{ zIndex: 50 }}
       >
-        <TotemGlitch src="/landingpage/totem.png" active={glitchTotem} />
+        <TotemGlitch src="/landingpage/totem.webp" active={glitchTotem} />
       </div>
 
       {/* Transparent Totem Button - positioned over the totem */}
