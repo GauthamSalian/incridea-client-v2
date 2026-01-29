@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import TotemGlitch from "../components/effects/TotemGlitch";
 
 function HomePage() {
@@ -8,6 +8,8 @@ function HomePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [glitchTotem, setGlitchTotem] = useState(false);
   const [pageReady, setPageReady] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [maskDataUrl, setMaskDataUrl] = useState("");
 
   // List of 6 biome images
   const biomeImages = [
@@ -30,9 +32,82 @@ function HomePage() {
     return () => cancelAnimationFrame(id);
   }, []);
 
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 800;
+    canvasRef.current = canvas;
+  }, []);
+
   // Background image paths - cycle through biomes
   const bottomLayerImage = `url('${biomeImages[bottomIndex]}')`;
   const topLayerImage = `url('${biomeImages[topIndex]}')`;
+
+  const noise = (x: number, y: number, seed: number) => {
+    const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
+    return n - Math.floor(n);
+  };
+
+  const generateDistortedMask = (radius: number, time: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return "";
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return "";
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    ctx.clearRect(0, 0, width, height);
+    const imageData = ctx.createImageData(width, height);
+    const data = imageData.data;
+
+    const noiseScale = 0.02;
+    const distortionAmount = 30;
+    const waveFrequency = 8;
+
+    const invertedRadius = 100 - radius;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+
+        const noiseValue1 = noise(x * noiseScale, y * noiseScale, time * 0.5);
+        const noiseValue2 = noise(
+          x * noiseScale + 100,
+          y * noiseScale + 100,
+          time * 0.7,
+        );
+        const wave =
+          Math.sin(angle * waveFrequency + time * 2) * distortionAmount;
+        const distortion = (noiseValue1 - 0.5) * distortionAmount + wave;
+
+        const distortedRadius = (invertedRadius / 100) * (width * 0.7);
+        const edgeWidth = 40;
+        const distortedDist = dist + distortion * noiseValue2;
+
+        let alpha = 0;
+        if (distortedDist < distortedRadius - edgeWidth) {
+          alpha = 255;
+        } else if (distortedDist < distortedRadius + edgeWidth) {
+          const edgeProgress =
+            (distortedDist - (distortedRadius - edgeWidth)) / (edgeWidth * 2);
+          alpha = Math.floor((1 - edgeProgress) * 255);
+        }
+
+        const index = (y * width + x) * 4;
+        data[index + 3] = alpha;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas.toDataURL();
+  };
 
   // Handle pointer move for mask position using CSS variables
   useEffect(() => {
@@ -71,18 +146,48 @@ function HomePage() {
     setIsTransitioning(true);
     setGlitchTotem(true);
 
-    const transitionDuration = isMobile ? 450 : 800;
-
-    setTimeout(() => {
-      const nextImageIndex = (bottomIndex + 1) % 6;
-      setTopIndex(bottomIndex);
-      setBottomIndex(nextImageIndex);
-      setIsTransitioning(false);
+    if (isMobile) {
+      const transitionDuration = 450;
 
       setTimeout(() => {
-        setGlitchTotem(false);
-      }, 150);
-    }, transitionDuration);
+        const nextImageIndex = (bottomIndex + 1) % 6;
+        setTopIndex(bottomIndex);
+        setBottomIndex(nextImageIndex);
+        setIsTransitioning(false);
+        setMaskDataUrl("");
+
+        setTimeout(() => setGlitchTotem(false), 150);
+      }, transitionDuration);
+      return;
+    }
+
+    const initialMask = generateDistortedMask(100, 0);
+    setMaskDataUrl(initialMask);
+
+    const duration = isMobile ? 450 : 800;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const radius = progress * 100;
+      const maskUrl = generateDistortedMask(radius, elapsed / 100);
+      setMaskDataUrl(maskUrl);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        const nextImageIndex = (bottomIndex + 1) % 6;
+        setTopIndex(bottomIndex);
+        setBottomIndex(nextImageIndex);
+        setIsTransitioning(false);
+        setMaskDataUrl("");
+        setTimeout(() => setGlitchTotem(false), 150);
+      }
+    };
+
+    requestAnimationFrame(animate);
   };
 
   // Cycle through biomes every 10 seconds
@@ -114,7 +219,7 @@ function HomePage() {
           setGlitchTotem(false);
         }, 450);
       }, 350); // glitch lead-in time
-    }, 5000); // every 5 seconds
+    }, 8000); // every 8 seconds
 
     return () => clearInterval(interval);
   }, [isTransitioning, bottomIndex]);
@@ -255,6 +360,12 @@ function HomePage() {
           style={{
             backgroundImage: topLayerImage,
             filter: "url(#biomeDistortion)",
+            maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
+            WebkitMaskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
+            maskSize: "cover",
+            WebkitMaskSize: "cover",
+            maskPosition: "center",
+            WebkitMaskPosition: "center",
             zIndex: 20,
           }}
           aria-hidden
