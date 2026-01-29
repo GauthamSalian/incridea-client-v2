@@ -357,7 +357,7 @@ function HomePage() {
         decoding="async"
         style={{
           zIndex: 10,
-          transform: "translateX(var(--parallax-x))",
+          transform: "translateX(var(--parallax-x)) scale(1.02)",
           transition: "transform 0.25s ease-out",
         }}
         aria-hidden
@@ -371,7 +371,7 @@ function HomePage() {
           className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
           decoding="async"
           style={{
-            transform: "translateX(var(--parallax-x))",
+            transform: "translateX(var(--parallax-x)) scale(1.02)",
             transition: "transform 0.25s ease-out",
             maskImage:
               !pageReady || !isInside
@@ -395,7 +395,7 @@ function HomePage() {
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform pointer-events-none"
           style={{
             backgroundImage: topLayerImage,
-            transform: "translateX(var(--parallax-x))",
+            transform: "translateX(var(--parallax-x)) scale(1.02)",
             transition: "transform 0.25s ease-out",
             filter: "url(#biomeDistortion)",
             maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
