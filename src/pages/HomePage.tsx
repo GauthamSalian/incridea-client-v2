@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import TotemGlitch from "../components/effects/TotemGlitch";
+
 
 function HomePage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -8,6 +10,8 @@ function HomePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [maskDataUrl, setMaskDataUrl] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [glitchTotem, setGlitchTotem] = useState(false);
+
 
   // List of 6 biome images
   const biomeImages = [
@@ -142,6 +146,8 @@ function HomePage() {
     if (isTransitioning) return;
 
     setIsTransitioning(true);
+    setGlitchTotem(true);
+
 
     // Generate initial full mask to prevent flash
     const initialMask = generateDistortedMask(100, 0);
@@ -177,6 +183,9 @@ function HomePage() {
         setBottomIndex(nextImageIndex);
         setIsTransitioning(false);
         setMaskDataUrl("");
+        setTimeout(() => {
+    setGlitchTotem(false);
+  }, 150);
       }
     };
 
@@ -184,20 +193,98 @@ function HomePage() {
   };
 
   // Cycle through biomes every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      triggerTransition();
-    }, 10000); // 10 seconds
+//  useEffect(() => {
+//   const interval = setInterval(() => {
+//     setGlitchTotem(true);
 
-    return () => clearInterval(interval);
-  }, [topIndex, isTransitioning]);
+//     // stop glitch after slices finish
+//     setTimeout(() => {
+//       setGlitchTotem(false);
+//     }, 450);
+//   }, 10000); // every 10s
+
+//   return () => clearInterval(interval);
+// }, []);
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (isTransitioning) return;
+
+    // 1️⃣ Start glitch
+    setGlitchTotem(true);
+
+    // 2️⃣ Let glitch play first
+    setTimeout(() => {
+      triggerTransition();
+
+      // 3️⃣ Stop glitch shortly after transition starts
+      setTimeout(() => {
+        setGlitchTotem(false);
+      }, 450);
+    }, 350); // glitch lead-in time
+  }, 5000); // every 5 seconds
+
+  return () => clearInterval(interval);
+}, [isTransitioning, bottomIndex]);
+
 
   const handleTotemClick = () => {
     triggerTransition();
   };
 
+  const softHorizontalMask = `
+  linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 35%,
+    black 65%,
+    transparent 100%
+  )
+`;
+
   return (
+    
     <main className="fixed inset-0 w-full h-full overflow-hidden">
+      <style>{`
+        .bg-corner-slice {
+  position: absolute;
+  width: 60%;           /* 👈 not full width anymore */
+  height: 40%;          /* 👈 feels corner-localized */
+  background-size: cover;
+  background-position: center;
+
+  mix-blend-mode: screen;
+  opacity: 0.2;
+
+  filter: blur(0.7px);
+
+  animation: bgSliceGlitch 0.18s steps(1, end) 1;
+  will-change: transform, filter;
+}
+
+@keyframes bgSliceGlitch {
+  0% {
+    transform: translate(0, 0) scaleY(1);
+    filter: none;
+  }
+
+  35% {
+    transform: translate(-4px, -1px) scaleY(1.03);
+    filter: drop-shadow(-2px 0 rgba(130, 70, 190, 0.45));
+  }
+
+  65% {
+    transform: translate(3px, 1px) scaleY(0.97);
+    filter: drop-shadow(2px 0 rgba(255, 255, 255, 0.35));
+  }
+
+  100% {
+    transform: translate(0, 0) scaleY(1);
+    filter: none;
+  }
+}
+
+  `}
+      </style>
       {/* Bottom Layer - Current Background */}
       <div
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform"
@@ -209,7 +296,7 @@ function HomePage() {
       />
 
       {/* Top Layer - Next Background with Distorted Radial Mask */}
-      <div
+      {/* <div
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform"
         style={{
           backgroundImage: topLayerImage,
@@ -230,7 +317,7 @@ function HomePage() {
           zIndex: 20,
         }}
         aria-hidden
-      />
+      /> */}
 
       {/* Spotlight glow effect overlay */}
       {isInside && (
@@ -250,19 +337,79 @@ function HomePage() {
         />
       )}
 
+      {/* One-time horizontal background tear */}
+{/* Corner background slice glitches (sync with totem) */}
+{glitchTotem && (
+  <div className="pointer-events-none fixed inset-0" style={{ zIndex: 28 }}>
+    {/* Top-left */}
+    <div
+      className="bg-corner-slice"
+      style={{
+        top: "0",
+        left: "0",
+        backgroundImage: bottomLayerImage,
+        WebkitMaskImage: softHorizontalMask,
+        maskImage: softHorizontalMask,
+        animationDelay: "0ms",
+      }}
+    />
+
+    {/* Top-right */}
+    <div
+      className="bg-corner-slice"
+      style={{
+        top: "0",
+        right: "0",
+        backgroundImage: bottomLayerImage,
+        WebkitMaskImage: softHorizontalMask,
+        maskImage: softHorizontalMask,
+        animationDelay: "25ms",
+      }}
+    />
+
+    {/* Bottom-left */}
+    <div
+      className="bg-corner-slice"
+      style={{
+        bottom: "0",
+        left: "0",
+        backgroundImage: bottomLayerImage,
+        WebkitMaskImage: softHorizontalMask,
+        maskImage: softHorizontalMask,
+        animationDelay: "40ms",
+      }}
+    />
+
+    {/* Bottom-right */}
+    <div
+      className="bg-corner-slice"
+      style={{
+        bottom: "0",
+        right: "0",
+        backgroundImage: bottomLayerImage,
+        WebkitMaskImage: softHorizontalMask,
+        maskImage: softHorizontalMask,
+        animationDelay: "55ms",
+      }}
+    />
+  </div>
+)}
+
       {/* Totem Image - centered and visible across all realms */}
-      <div
-        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{
-          zIndex: 50,
-        }}
-      >
-        <img
-          src="/landingpage/totem.png"
-          alt="Totem"
-          className="h-96 w-auto object-contain"
-        />
-      </div>
+     {/* Totem Image */}
+<div
+  className="absolute left-1/2 top-1/2 
+             -translate-x-1/2 -translate-y-1/2 
+             pointer-events-none"
+  style={{ zIndex: 50 }}
+>
+  <TotemGlitch
+  src="/landingpage/totem.png"
+  active={glitchTotem}
+/>
+
+</div>
+
 
       {/* Transparent Totem Button - positioned over the totem */}
       <button
