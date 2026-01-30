@@ -17,13 +17,15 @@ function HomePage() {
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
 
+  const videoQuality = isMobile ? "mbl" : "pc";
+
   const biomeVideos = [
-    "/landingpage/1.webm",
-    "/landingpage/2.webm",
-    "/landingpage/3.webm",
-    "/landingpage/4.webm",
-    "/landingpage/5.webm",
-    "/landingpage/6.webm",
+    `/landingpage/1${videoQuality}.webm`,
+    `/landingpage/2${videoQuality}.webm`,
+    `/landingpage/3${videoQuality}.webm`,
+    `/landingpage/4${videoQuality}.webm`,
+    `/landingpage/5${videoQuality}.webm`,
+    `/landingpage/6${videoQuality}.webm`,
   ];
 
   useEffect(() => {
@@ -40,11 +42,18 @@ function HomePage() {
     const previousBodyOverscroll = bodyEl.style.overscrollBehaviorY;
     const previousHtmlTouchAction = htmlEl.style.touchAction;
     const previousBodyTouchAction = bodyEl.style.touchAction;
+    const previousHtmlOverflow = htmlEl.style.overflow;
+    const previousBodyOverflow = bodyEl.style.overflow;
+
+    if (isMobile) {
+      htmlEl.style.overflow = "hidden";
+      bodyEl.style.overflow = "hidden";
+      htmlEl.style.touchAction = "none";
+      bodyEl.style.touchAction = "none";
+    }
 
     htmlEl.style.overscrollBehaviorY = "none";
     bodyEl.style.overscrollBehaviorY = "none";
-    htmlEl.style.touchAction = "pan-x pan-y";
-    bodyEl.style.touchAction = "pan-x pan-y";
 
     const onTouchStart = (event: TouchEvent) => {
       if (event.touches.length !== 1) return;
@@ -52,6 +61,11 @@ function HomePage() {
     };
 
     const onTouchMove = (event: TouchEvent) => {
+      if (isMobile) {
+        event.preventDefault();
+        return;
+      }
+
       if (event.touches.length !== 1) return;
       const currentY = event.touches[0].clientY;
       const isPullingDown = currentY > startY;
@@ -72,8 +86,10 @@ function HomePage() {
       bodyEl.style.overscrollBehaviorY = previousBodyOverscroll;
       htmlEl.style.touchAction = previousHtmlTouchAction;
       bodyEl.style.touchAction = previousBodyTouchAction;
+      htmlEl.style.overflow = previousHtmlOverflow;
+      bodyEl.style.overflow = previousBodyOverflow;
     };
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     const canvas = document.createElement("canvas");
@@ -85,7 +101,14 @@ function HomePage() {
   useEffect(() => {
     if (!isTransitioning && isMobile && bottomVideoRef.current) {
       bottomVideoRef.current.currentTime = 0;
-      bottomVideoRef.current.play().catch(() => {});
+
+      const playPromise = bottomVideoRef.current.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Autoplay blocked on iOS:", error);
+        });
+      }
     }
   }, [bottomIndex, isTransitioning, isMobile]);
 
@@ -415,6 +438,14 @@ function HomePage() {
 
       <style>
         {`
+        /* Hide iOS video controls */
+        video::-webkit-media-controls-panel, 
+        video::-webkit-media-controls-play-button, 
+        video::-webkit-media-controls-start-playback-button {
+          display: none !important;
+          -webkit-appearance: none;
+        }
+
         @keyframes radialPulse {
           0% {
             filter: brightness(1) drop-shadow(0 0 0px rgba(251, 191, 36, 0));
@@ -477,12 +508,14 @@ function HomePage() {
         <video
           ref={bottomVideoRef}
           src={biomeVideos[bottomIndex]}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover pointer-events-none"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
+          disableRemotePlayback
+          controls={false}
           aria-hidden
         />
       </div>
@@ -511,12 +544,14 @@ function HomePage() {
           <video
             ref={topVideoRef}
             src={biomeVideos[topIndex]}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none"
             autoPlay
             muted
             loop
             playsInline
             preload="auto"
+            disableRemotePlayback
+            controls={false}
             aria-hidden
           />
         </div>
@@ -527,6 +562,9 @@ function HomePage() {
           autoPlay
           muted
           playsInline
+          preload="auto"
+          disableRemotePlayback
+          controls={false}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none will-change-transform"
           style={{
             transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
@@ -580,7 +618,9 @@ function HomePage() {
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover"
+              disableRemotePlayback
+              controls={false}
+              className="w-full h-full object-cover pointer-events-none"
             />
           </div>
 
@@ -599,7 +639,9 @@ function HomePage() {
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover"
+              disableRemotePlayback
+              controls={false}
+              className="w-full h-full object-cover pointer-events-none"
             />
           </div>
 
@@ -618,7 +660,9 @@ function HomePage() {
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover"
+              disableRemotePlayback
+              controls={false}
+              className="w-full h-full object-cover pointer-events-none"
             />
           </div>
 
@@ -637,7 +681,9 @@ function HomePage() {
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover"
+              disableRemotePlayback
+              controls={false}
+              className="w-full h-full object-cover pointer-events-none"
             />
           </div>
         </div>
