@@ -10,19 +10,21 @@ function HomePage() {
   const [pageReady, setPageReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [maskDataUrl, setMaskDataUrl] = useState("");
-
-  const biomeImages = [
-    "/landingpage/1.webp",
-    "/landingpage/2.webp",
-    "/landingpage/3.webp",
-    "/landingpage/4.webp",
-    "/landingpage/5.webp",
-    "/landingpage/6.webp",
-  ];
+  const bottomVideoRef = useRef<HTMLVideoElement>(null);
+  const topVideoRef = useRef<HTMLVideoElement>(null);
 
   const isMobile =
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
+
+  const biomeVideos = [
+    "/landingpage/1.webm",
+    "/landingpage/2.webm",
+    "/landingpage/3.webm",
+    "/landingpage/4.webm",
+    "/landingpage/5.webm",
+    "/landingpage/6.webm",
+  ];
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setPageReady(true));
@@ -80,8 +82,16 @@ function HomePage() {
     canvasRef.current = canvas;
   }, []);
 
-  const bottomLayerImage = `url('${biomeImages[bottomIndex]}')`;
-  const topLayerImage = `url('${biomeImages[topIndex]}')`;
+  // Ensure bottom video plays when transition ends on mobile
+  useEffect(() => {
+    if (!isTransitioning && isMobile && bottomVideoRef.current) {
+      bottomVideoRef.current.currentTime = 0;
+      bottomVideoRef.current.play().catch(() => {});
+    }
+  }, [bottomIndex, isTransitioning, isMobile]);
+
+  const bottomLayerImage = `url('${biomeVideos[bottomIndex]}')`;
+  const topLayerImage = `url('${biomeVideos[topIndex]}')`;
 
   const noise = (x: number, y: number, seed: number) => {
     const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
@@ -297,7 +307,13 @@ function HomePage() {
         setIsTransitioning(false);
         setMaskDataUrl("");
 
-        setTimeout(() => setGlitchTotem(false), 150);
+        // Ensure new video plays
+        setTimeout(() => {
+          if (bottomVideoRef.current) {
+            bottomVideoRef.current.play().catch(() => {});
+          }
+          setGlitchTotem(false);
+        }, 150);
       }, transitionDuration);
       return;
     }
@@ -442,12 +458,15 @@ function HomePage() {
 
   `}
       </style>
-      <img
-        src={biomeImages[bottomIndex]}
-        alt="Background"
+      <video
+        ref={bottomVideoRef}
+        src={biomeVideos[bottomIndex]}
         className="absolute inset-0 w-full h-full object-cover will-change-transform"
-        fetchPriority="high"
-        decoding="async"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
         style={{
           zIndex: 10,
           transform: "translateX(var(--parallax-x)) scale(1.02)",
@@ -457,11 +476,15 @@ function HomePage() {
       />
 
       {!isTransitioning && (
-        <img
-          src={biomeImages[topIndex]}
-          alt="Next Background"
+        <video
+          ref={topVideoRef}
+          src={biomeVideos[topIndex]}
           className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
-          decoding="async"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
           style={{
             transform: "translateX(var(--parallax-x)) scale(1.02)",
             transition: "transform 0.25s ease-out",
@@ -573,6 +596,20 @@ function HomePage() {
           />
         </div>
       )}
+
+      <div
+        className="absolute left-1/2 top-0 
+             -translate-x-1/2 pt-4 
+             pointer-events-none"
+        style={{ zIndex: 40 }}
+      >
+        <img
+          src="/landingpage/Incrideaici.webp"
+          alt="Incridea ICI Logo"
+          className="h-20 md:h-20 w-auto"
+          decoding="async"
+        />
+      </div>
 
       <div
         className="absolute left-1/2 top-1/2 
