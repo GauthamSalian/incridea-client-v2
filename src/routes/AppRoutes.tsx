@@ -49,8 +49,8 @@ function AppRoutes() {
   return (
     <Suspense fallback={<div className="fixed inset-0 bg-black" />}>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/events" element={<EventsPage />} />

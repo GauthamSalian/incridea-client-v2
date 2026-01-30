@@ -30,6 +30,50 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    let startY = 0;
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+    const previousHtmlOverscroll = htmlEl.style.overscrollBehaviorY;
+    const previousBodyOverscroll = bodyEl.style.overscrollBehaviorY;
+    const previousHtmlTouchAction = htmlEl.style.touchAction;
+    const previousBodyTouchAction = bodyEl.style.touchAction;
+
+    htmlEl.style.overscrollBehaviorY = "none";
+    bodyEl.style.overscrollBehaviorY = "none";
+    htmlEl.style.touchAction = "pan-x pan-y";
+    bodyEl.style.touchAction = "pan-x pan-y";
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      startY = event.touches[0].clientY;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      const currentY = event.touches[0].clientY;
+      const isPullingDown = currentY > startY;
+      const scrollTop = document.scrollingElement?.scrollTop ?? window.scrollY;
+
+      if (isPullingDown && scrollTop <= 0) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      htmlEl.style.overscrollBehaviorY = previousHtmlOverscroll;
+      bodyEl.style.overscrollBehaviorY = previousBodyOverscroll;
+      htmlEl.style.touchAction = previousHtmlTouchAction;
+      bodyEl.style.touchAction = previousBodyTouchAction;
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 800;
     canvas.height = 800;
@@ -143,10 +187,16 @@ function HomePage() {
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
         }
-        
+
         rafId = requestAnimationFrame(() => {
-          document.documentElement.style.setProperty("--mask-x", `${clientX}px`);
-          document.documentElement.style.setProperty("--mask-y", `${clientY}px`);
+          document.documentElement.style.setProperty(
+            "--mask-x",
+            `${clientX}px`,
+          );
+          document.documentElement.style.setProperty(
+            "--mask-y",
+            `${clientY}px`,
+          );
           document.documentElement.style.setProperty(
             "--mask-radius",
             `${maskRadius}px`,
