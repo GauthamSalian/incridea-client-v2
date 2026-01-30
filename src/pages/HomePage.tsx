@@ -91,7 +91,6 @@ function HomePage() {
   }, [bottomIndex, isTransitioning, isMobile]);
 
   const bottomLayerImage = `url('${biomeVideos[bottomIndex]}')`;
-  const topLayerImage = `url('${biomeVideos[topIndex]}')`;
 
   const noise = (x: number, y: number, seed: number) => {
     const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
@@ -418,15 +417,26 @@ function HomePage() {
 
       <style>
         {`
+        @keyframes radialPulse {
+          0% {
+            filter: brightness(1) drop-shadow(0 0 0px rgba(251, 191, 36, 0));
+          }
+          50% {
+            filter: brightness(1.1) drop-shadow(0 0 40px rgba(251, 191, 36, 0.5));
+          }
+          100% {
+            filter: brightness(1) drop-shadow(0 0 0px rgba(251, 191, 36, 0));
+          }
+        }
+
         .bg-corner-slice {
   position: absolute;
   width: 60%;
   height: 40%;
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
 
   mix-blend-mode: screen;
-  opacity: 0.2;
+  opacity: 0.35;
 
   filter: blur(0.7px);
 
@@ -458,36 +468,33 @@ function HomePage() {
 
   `}
       </style>
-      <video
-        ref={bottomVideoRef}
-        src={biomeVideos[bottomIndex]}
-        className="absolute inset-0 w-full h-full object-cover will-change-transform"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
+      <div
+        className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 10,
           transform: "translateX(var(--parallax-x)) scale(1.02)",
-          transition: "transform 0.25s ease-out",
+          animation: "radialPulse 3s ease-in-out infinite",
         }}
-        aria-hidden
-      />
-
-      {!isTransitioning && (
+      >
         <video
-          ref={topVideoRef}
-          src={biomeVideos[topIndex]}
-          className="absolute inset-0 w-full h-full object-cover will-change-transform pointer-events-none"
+          ref={bottomVideoRef}
+          src={biomeVideos[bottomIndex]}
+          className="w-full h-full object-cover"
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
+          aria-hidden
+        />
+      </div>
+
+      {!isTransitioning && (
+        <div
+          className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             transform: "translateX(var(--parallax-x)) scale(1.02)",
-            transition: "transform 0.25s ease-out",
+            animation: "radialPulse 3s ease-in-out infinite",
             maskImage:
               !pageReady || !isInside
                 ? "none"
@@ -502,16 +509,29 @@ function HomePage() {
             WebkitMaskPosition: "center",
             zIndex: 20,
           }}
-          aria-hidden
-        />
+        >
+          <video
+            ref={topVideoRef}
+            src={biomeVideos[topIndex]}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden
+          />
+        </div>
       )}
       {isTransitioning && (
-        <div
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat will-change-transform pointer-events-none"
+        <video
+          src={biomeVideos[topIndex]}
+          autoPlay
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none will-change-transform"
           style={{
-            backgroundImage: topLayerImage,
             transform: "translateX(var(--parallax-x)) scale(1.02)",
-            transition: "transform 0.25s ease-out",
             filter: "url(#biomeDistortion)",
             maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
             WebkitMaskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
@@ -552,48 +572,76 @@ function HomePage() {
             style={{
               top: "0",
               left: "0",
-              backgroundImage: bottomLayerImage,
               WebkitMaskImage: softHorizontalMask,
               maskImage: softHorizontalMask,
               animationDelay: "0ms",
             }}
-          />
+          >
+            <video
+              src={biomeVideos[bottomIndex]}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           <div
             className="bg-corner-slice"
             style={{
               top: "0",
               right: "0",
-              backgroundImage: bottomLayerImage,
               WebkitMaskImage: softHorizontalMask,
               maskImage: softHorizontalMask,
               animationDelay: "25ms",
             }}
-          />
+          >
+            <video
+              src={biomeVideos[bottomIndex]}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           <div
             className="bg-corner-slice"
             style={{
               bottom: "0",
               left: "0",
-              backgroundImage: bottomLayerImage,
               WebkitMaskImage: softHorizontalMask,
               maskImage: softHorizontalMask,
               animationDelay: "40ms",
             }}
-          />
+          >
+            <video
+              src={biomeVideos[bottomIndex]}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           <div
             className="bg-corner-slice"
             style={{
               bottom: "0",
               right: "0",
-              backgroundImage: bottomLayerImage,
               WebkitMaskImage: softHorizontalMask,
               maskImage: softHorizontalMask,
               animationDelay: "55ms",
             }}
-          />
+          >
+            <video
+              src={biomeVideos[bottomIndex]}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       )}
 
