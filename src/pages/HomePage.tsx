@@ -90,8 +90,6 @@ function HomePage() {
     }
   }, [bottomIndex, isTransitioning, isMobile]);
 
-  const bottomLayerImage = `url('${biomeVideos[bottomIndex]}')`;
-
   const noise = (x: number, y: number, seed: number) => {
     const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
     return n - Math.floor(n);
