@@ -82,7 +82,6 @@ function HomePage() {
     canvasRef.current = canvas;
   }, []);
 
-  // Ensure bottom video plays when transition ends on mobile
   useEffect(() => {
     if (!isTransitioning && isMobile && bottomVideoRef.current) {
       bottomVideoRef.current.currentTime = 0;
@@ -304,7 +303,6 @@ function HomePage() {
         setIsTransitioning(false);
         setMaskDataUrl("");
 
-        // Ensure new video plays
         setTimeout(() => {
           if (bottomVideoRef.current) {
             bottomVideoRef.current.play().catch(() => {});
@@ -345,6 +343,8 @@ function HomePage() {
   };
 
   useEffect(() => {
+    if (isMobile) return;
+
     const interval = setInterval(() => {
       if (isTransitioning) return;
 
@@ -360,7 +360,7 @@ function HomePage() {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [isTransitioning, bottomIndex]);
+  }, [isTransitioning, bottomIndex, isMobile]);
 
   const handleTotemClick = () => {
     triggerTransition();
@@ -470,7 +470,7 @@ function HomePage() {
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 10,
-          transform: "translateX(var(--parallax-x)) scale(1.02)",
+          transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
           animation: "radialPulse 3s ease-in-out infinite",
         }}
       >
@@ -491,7 +491,7 @@ function HomePage() {
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
-            transform: "translateX(var(--parallax-x)) scale(1.02)",
+            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
             animation: "radialPulse 3s ease-in-out infinite",
             maskImage:
               !pageReady || !isInside
@@ -529,7 +529,7 @@ function HomePage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover pointer-events-none will-change-transform"
           style={{
-            transform: "translateX(var(--parallax-x)) scale(1.02)",
+            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
             filter: "url(#biomeDistortion)",
             maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
             WebkitMaskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
@@ -665,7 +665,7 @@ function HomePage() {
       >
         <div
           style={{
-            transform: "translateX(var(--parallax-x))",
+            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 0.6 : 1})`,
             transition: "transform 0.25s ease-out",
           }}
         >
