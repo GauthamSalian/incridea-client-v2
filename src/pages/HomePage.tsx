@@ -3,33 +3,34 @@ import TotemGlitch from "../components/effects/TotemGlitch";
 
 function HomePage() {
   const [isInside, setIsInside] = useState(false);
-  const [topIndex, setTopIndex] = useState(0);
-  const [bottomIndex, setBottomIndex] = useState(1);
+  const [activeVideoIndex, setActiveVideoIndex] = useState(0);
+  const [nextVideoIndex, setNextVideoIndex] = useState(1);
+  const [showPlayerB, setShowPlayerB] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [glitchTotem, setGlitchTotem] = useState(false);
-  const [pageReady, setPageReady] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [maskDataUrl, setMaskDataUrl] = useState("");
-  const bottomVideoRef = useRef<HTMLVideoElement>(null);
-  const topVideoRef = useRef<HTMLVideoElement>(null);
+  const [glitchVideoIndex, setGlitchVideoIndex] = useState(0);
+  const playerARef = useRef<HTMLVideoElement>(null);
+  const playerBRef = useRef<HTMLVideoElement>(null);
+  const peekARef = useRef<HTMLVideoElement>(null);
+  const peekBRef = useRef<HTMLVideoElement>(null);
 
   const isMobile =
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
 
-  const videoQuality = isMobile ? "mbl" : "pc";
-
   const biomeVideos = [
-    `/landingpage/1${videoQuality}.webm`,
-    `/landingpage/2${videoQuality}.webm`,
-    `/landingpage/3${videoQuality}.webm`,
-    `/landingpage/4${videoQuality}.webm`,
-    `/landingpage/5${videoQuality}.webm`,
-    `/landingpage/6${videoQuality}.webm`,
+    "/landingpage/1.webm",
+    "/landingpage/2.webm",
+    "/landingpage/3.webm",
+    "/landingpage/4.webm",
+    "/landingpage/5.webm",
+    "/landingpage/6.webm",
   ];
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => setPageReady(true));
+    const id = requestAnimationFrame(() => {
+      // Page ready to render
+    });
     return () => cancelAnimationFrame(id);
   }, []);
 
@@ -42,8 +43,6 @@ function HomePage() {
     const previousBodyOverscroll = bodyEl.style.overscrollBehaviorY;
     const previousHtmlTouchAction = htmlEl.style.touchAction;
     const previousBodyTouchAction = bodyEl.style.touchAction;
-    const previousHtmlOverflow = htmlEl.style.overflow;
-    const previousBodyOverflow = bodyEl.style.overflow;
 
     if (isMobile) {
       htmlEl.style.overflow = "hidden";
@@ -86,100 +85,11 @@ function HomePage() {
       bodyEl.style.overscrollBehaviorY = previousBodyOverscroll;
       htmlEl.style.touchAction = previousHtmlTouchAction;
       bodyEl.style.touchAction = previousBodyTouchAction;
-      htmlEl.style.overflow = previousHtmlOverflow;
-      bodyEl.style.overflow = previousBodyOverflow;
     };
   }, [isMobile]);
 
   useEffect(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 800;
-    canvasRef.current = canvas;
-  }, []);
-
-  useEffect(() => {
-    if (!isTransitioning && isMobile && bottomVideoRef.current) {
-      bottomVideoRef.current.currentTime = 0;
-
-      const playPromise = bottomVideoRef.current.play();
-
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay blocked on iOS:", error);
-        });
-      }
-    }
-  }, [bottomIndex, isTransitioning, isMobile]);
-
-  const noise = (x: number, y: number, seed: number) => {
-    const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
-    return n - Math.floor(n);
-  };
-
-  const generateDistortedMask = (radius: number, time: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return "";
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return "";
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    ctx.clearRect(0, 0, width, height);
-    const imageData = ctx.createImageData(width, height);
-    const data = imageData.data;
-
-    const noiseScale = 0.02;
-    const distortionAmount = 30;
-    const waveFrequency = 8;
-
-    const invertedRadius = 100 - radius;
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const dx = x - centerX;
-        const dy = y - centerY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx);
-
-        const noiseValue1 = noise(x * noiseScale, y * noiseScale, time * 0.5);
-        const noiseValue2 = noise(
-          x * noiseScale + 100,
-          y * noiseScale + 100,
-          time * 0.7,
-        );
-        const wave =
-          Math.sin(angle * waveFrequency + time * 2) * distortionAmount;
-        const distortion = (noiseValue1 - 0.5) * distortionAmount + wave;
-
-        const distortedRadius = (invertedRadius / 100) * (width * 0.7);
-        const edgeWidth = 40;
-        const distortedDist = dist + distortion * noiseValue2;
-
-        let alpha = 0;
-        if (distortedDist < distortedRadius - edgeWidth) {
-          alpha = 255;
-        } else if (distortedDist < distortedRadius + edgeWidth) {
-          const edgeProgress =
-            (distortedDist - (distortedRadius - edgeWidth)) / (edgeWidth * 2);
-          alpha = Math.floor((1 - edgeProgress) * 255);
-        }
-
-        const index = (y * width + x) * 4;
-        data[index + 3] = alpha;
-      }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-    return canvas.toDataURL();
-  };
-
-  useEffect(() => {
-    const maskRadius = isMobile ? 150 : 250;
+    const maskRadius = isMobile ? 150 : 350;
 
     const handlePointerMove = (e: PointerEvent) => {
       document.documentElement.style.setProperty("--mask-x", `${e.clientX}px`);
@@ -313,91 +223,55 @@ function HomePage() {
   const triggerTransition = () => {
     if (isTransitioning) return;
 
+    const visibleIndex = showPlayerB ? nextVideoIndex : activeVideoIndex;
+    const upcomingIndex = (visibleIndex + 1) % biomeVideos.length;
+    const previousIndex =
+      (visibleIndex - 1 + biomeVideos.length) % biomeVideos.length;
+
     setIsTransitioning(true);
     setGlitchTotem(true);
+    setGlitchVideoIndex(previousIndex);
 
-    if (isMobile) {
-      const transitionDuration = 450;
-
-      setTimeout(() => {
-        const nextImageIndex = (bottomIndex + 1) % 6;
-        setTopIndex(bottomIndex);
-        setBottomIndex(nextImageIndex);
-        setIsTransitioning(false);
-        setMaskDataUrl("");
-
-        setTimeout(() => {
-          if (bottomVideoRef.current) {
-            bottomVideoRef.current.play().catch(() => {});
-          }
-          setGlitchTotem(false);
-        }, 150);
-      }, transitionDuration);
-      return;
+    // PRELOAD hidden player FIRST
+    if (showPlayerB) {
+      setActiveVideoIndex(upcomingIndex);
+      prepareNextVideo(upcomingIndex, playerARef.current);
+    } else {
+      setNextVideoIndex(upcomingIndex);
+      prepareNextVideo(upcomingIndex, playerBRef.current);
     }
 
-    const initialMask = generateDistortedMask(100, 0);
-    setMaskDataUrl(initialMask);
+    // Wait 2 frames for decode
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setShowPlayerB((prev) => !prev); // instant cut behind glitch
+      });
+    });
 
-    const duration = isMobile ? 450 : 800;
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      const radius = progress * 100;
-      const maskUrl = generateDistortedMask(radius, elapsed / 100);
-      setMaskDataUrl(maskUrl);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        const nextImageIndex = (bottomIndex + 1) % 6;
-        setTopIndex(bottomIndex);
-        setBottomIndex(nextImageIndex);
-        setIsTransitioning(false);
-        setMaskDataUrl("");
-        setTimeout(() => setGlitchTotem(false), 150);
-      }
-    };
-
-    requestAnimationFrame(animate);
+    setTimeout(() => {
+      setGlitchTotem(false);
+      setIsTransitioning(false);
+    }, 500);
   };
 
   useEffect(() => {
-    if (isMobile) return;
-
     const interval = setInterval(() => {
-      if (isTransitioning) return;
-
-      setGlitchTotem(true);
-
-      setTimeout(() => {
-        triggerTransition();
-
-        setTimeout(() => {
-          setGlitchTotem(false);
-        }, 450);
-      }, 350);
+      triggerTransition();
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [isTransitioning, bottomIndex, isMobile]);
+  }, [isTransitioning]);
 
   const handleTotemClick = () => {
     triggerTransition();
   };
 
-  const softHorizontalMask = `
-  linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 35%,
-    black 65%,
-    transparent 100%
-  )
-`;
+  const prepareNextVideo = (index: number, ref: HTMLVideoElement | null) => {
+    if (!ref) return;
+    ref.src = biomeVideos[index];
+    ref.load();
+    ref.play().catch(() => {});
+  };
 
   return (
     <main className="fixed inset-0 w-full h-full overflow-hidden">
@@ -505,10 +379,30 @@ function HomePage() {
           animation: "radialPulse 3s ease-in-out infinite",
         }}
       >
+        {/* PLAYER A */}
         <video
-          ref={bottomVideoRef}
-          src={biomeVideos[bottomIndex]}
-          className="w-full h-full object-cover pointer-events-none"
+          ref={playerARef}
+          src={biomeVideos[activeVideoIndex]}
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-0 ${
+            showPlayerB ? "opacity-0" : "opacity-100"
+          }`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disableRemotePlayback
+          controls={false}
+          aria-hidden
+        />
+
+        {/* PLAYER B */}
+        <video
+          ref={playerBRef}
+          src={biomeVideos[nextVideoIndex]}
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-0 ${
+            showPlayerB ? "opacity-100" : "opacity-0"
+          }`}
           autoPlay
           muted
           loop
@@ -520,20 +414,19 @@ function HomePage() {
         />
       </div>
 
+      {/* Hover Peek Overlay - Reveals the alternate video */}
       {!isTransitioning && (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
             animation: "radialPulse 3s ease-in-out infinite",
-            maskImage:
-              !pageReady || !isInside
-                ? "none"
-                : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
-            WebkitMaskImage:
-              !pageReady || !isInside
-                ? "none"
-                : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
+            maskImage: !isInside
+              ? "none"
+              : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
+            WebkitMaskImage: !isInside
+              ? "none"
+              : "radial-gradient(circle var(--mask-radius) at var(--mask-x) var(--mask-y), transparent 0%, transparent 45%, rgba(0,0,0,0.7) 65%, black 85%)",
             maskSize: "cover",
             WebkitMaskSize: "cover",
             maskPosition: "center",
@@ -541,10 +434,28 @@ function HomePage() {
             zIndex: 20,
           }}
         >
+          {/* Show the opposite player - always render both for synced playback */}
           <video
-            ref={topVideoRef}
-            src={biomeVideos[topIndex]}
-            className="w-full h-full object-cover pointer-events-none"
+            ref={peekARef}
+            src={biomeVideos[activeVideoIndex]}
+            className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${
+              showPlayerB ? "opacity-100" : "opacity-0"
+            }`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            disableRemotePlayback
+            controls={false}
+            aria-hidden
+          />
+          <video
+            ref={peekBRef}
+            src={biomeVideos[nextVideoIndex]}
+            className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${
+              showPlayerB ? "opacity-0" : "opacity-100"
+            }`}
             autoPlay
             muted
             loop
@@ -555,30 +466,6 @@ function HomePage() {
             aria-hidden
           />
         </div>
-      )}
-      {isTransitioning && (
-        <video
-          src={biomeVideos[topIndex]}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          disableRemotePlayback
-          controls={false}
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none will-change-transform"
-          style={{
-            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
-            filter: "url(#biomeDistortion)",
-            maskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
-            WebkitMaskImage: !isMobile ? `url('${maskDataUrl}')` : "none",
-            maskSize: "cover",
-            WebkitMaskSize: "cover",
-            maskPosition: "center",
-            WebkitMaskPosition: "center",
-            zIndex: 20,
-          }}
-          aria-hidden
-        />
       )}
 
       {isInside && (
@@ -598,96 +485,28 @@ function HomePage() {
         />
       )}
 
-      {glitchTotem && (
-        <div
-          className="pointer-events-none fixed inset-0"
-          style={{ zIndex: 28 }}
-        >
-          <div
-            className="bg-corner-slice"
-            style={{
-              top: "0",
-              left: "0",
-              WebkitMaskImage: softHorizontalMask,
-              maskImage: softHorizontalMask,
-              animationDelay: "0ms",
-            }}
-          >
-            <video
-              src={biomeVideos[bottomIndex]}
-              autoPlay
-              muted
-              playsInline
-              disableRemotePlayback
-              controls={false}
-              className="w-full h-full object-cover pointer-events-none"
-            />
-          </div>
-
-          <div
-            className="bg-corner-slice"
-            style={{
-              top: "0",
-              right: "0",
-              WebkitMaskImage: softHorizontalMask,
-              maskImage: softHorizontalMask,
-              animationDelay: "25ms",
-            }}
-          >
-            <video
-              src={biomeVideos[bottomIndex]}
-              autoPlay
-              muted
-              playsInline
-              disableRemotePlayback
-              controls={false}
-              className="w-full h-full object-cover pointer-events-none"
-            />
-          </div>
-
-          <div
-            className="bg-corner-slice"
-            style={{
-              bottom: "0",
-              left: "0",
-              WebkitMaskImage: softHorizontalMask,
-              maskImage: softHorizontalMask,
-              animationDelay: "40ms",
-            }}
-          >
-            <video
-              src={biomeVideos[bottomIndex]}
-              autoPlay
-              muted
-              playsInline
-              disableRemotePlayback
-              controls={false}
-              className="w-full h-full object-cover pointer-events-none"
-            />
-          </div>
-
-          <div
-            className="bg-corner-slice"
-            style={{
-              bottom: "0",
-              right: "0",
-              WebkitMaskImage: softHorizontalMask,
-              maskImage: softHorizontalMask,
-              animationDelay: "55ms",
-            }}
-          >
-            <video
-              src={biomeVideos[bottomIndex]}
-              autoPlay
-              muted
-              playsInline
-              disableRemotePlayback
-              controls={false}
-              className="w-full h-full object-cover pointer-events-none"
-            />
-          </div>
-        </div>
-      )}
+      {/* Glitch Overlay (Persistent, Not Mounted) - Shows during transitions */}
+      <div
+        className={`fixed inset-0 z-30 pointer-events-none transition-opacity duration-75 ${
+          glitchTotem ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <video
+          src={biomeVideos[glitchVideoIndex]}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 1.1 : 1.02})`,
+            filter: "url(#biomeDistortion)",
+          }}
+          disableRemotePlayback
+          controls={false}
+          aria-hidden
+        />
+      </div>
 
       <div
         className="absolute left-1/2 top-0 
@@ -707,11 +526,12 @@ function HomePage() {
         className="absolute left-1/2 top-1/2 
              -translate-x-1/2 -translate-y-1/2 
              pointer-events-none"
-        style={{ zIndex: 50 }}
+        style={{ zIndex: 50, height: "70vh", maxHeight: "700px" }}
       >
         <div
+          className="h-full flex items-center justify-center"
           style={{
-            transform: `translateX(var(--parallax-x)) scale(${isMobile ? 0.6 : 1})`,
+            transform: `translateX(var(--parallax-x))`,
             transition: "transform 0.25s ease-out",
           }}
         >
@@ -721,9 +541,11 @@ function HomePage() {
 
       <button
         onClick={handleTotemClick}
-        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-80 bg-transparent cursor-pointer hover:bg-white/5 transition-colors duration-300 rounded-lg"
+        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 bg-transparent cursor-pointer hover:bg-white/5 transition-colors duration-300 rounded-lg"
         style={{
           zIndex: 100,
+          height: "70vh",
+          maxHeight: "700px",
         }}
         aria-label="Click to swap biomes"
       />
